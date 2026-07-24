@@ -113,35 +113,68 @@ Modelled on dominoes/Rummikub simplicity, as the transcript proposes.
 
 ### The scoring model (the heart)
 
-Each link's score multiplies three honest signals plus an optional bonus:
+Each link's score **adds four small whole numbers** — no multiplication, no decimals, so a
+10-year-old can verify the total in their head and learn the strategy from the breakdown:
 
 ```
-linkScore = polarizationBase  ×  surpriseMultiplier  ×  nicheMultiplier   +  resonanceBonus
+linkScore = topic + differentLives + specificPeople + perfectMatch      (max ≈ 21)
 
-polarizationBase   how divided the world is on THIS dimension   (family ≈ low, abortion ≈ high)
-surpriseMultiplier how far apart the two groups are OVERALL      (cultural distance → bridge bonus)
-nicheMultiplier    how specific the two groups are              (a single persona > "all women")
-resonanceBonus     a separate reward for a very TIGHT agreement between two niche groups
+topic           1–6   how divided the world is on THIS question (family = 1, same-sex couples = 6)
+differentLives  0–11  how far apart these two people are overall  ← the mission, as math
+specificPeople  0–2   how sharply defined they are ("all women" scores nothing here)
+perfectMatch    0–2   a bonus for near-identical answers between two specific people
 ```
 
-- **surpriseMultiplier** is the mission, expressed as math: bridging distant groups pays.
-- **nicheMultiplier** implements the transcript's "niche > aggregated" intuition — broad groups
-  ("all Americans") sit near the world mean, match easily, and pay little; a sharply-defined persona
-  is extreme, hard to match, and pays more.
-- **resonanceBonus** deliberately keeps the *opposite* strategy alive: two tightly-aligned niche
-  groups (Argentine + American military on nationalism) form a "strong band" worth chasing too.
+The reveal shows exactly this: `topic +1 · different lives +11 · specific people +2`.
 
-That last point resolves the central debate in the transcript ("do we reward strong bands or
-improbable bands?") — **we reward both, via different terms, so two real strategies coexist:** go
-long and safe (many easy links), or go short and spicy (few rare bridges). That is the Scrabble
-"play XYLOPHONE or just play X" choice, and it's what gives the game legs.
+**Why `differentLives` dominates.** It is deliberately the largest term. It means the game's biggest
+rewards are only reachable by connecting people who look nothing alike — the behaviour the whole
+project exists to encourage. `perfectMatch` keeps the transcript's "strong bond" strategy alive as a
+smaller, secondary path (Fork C).
+
+This resolves the central debate in the transcript ("do we reward strong bands or improbable
+bands?") — **we reward both, via different terms, so two real strategies coexist:** go long and safe
+(many easy links), or go short and spicy (few rare bridges). That is the Scrabble "play XYLOPHONE or
+just play X" choice, and it's what gives the game legs.
+
+### The connection rule, and one counter-intuitive fix
+
+Two people connect on a question when their answers fall within a **tolerance band**. The band is not
+fixed — **it widens the more different the two people are.**
+
+That sounds backwards, so here is why it is right. With a fixed band, the prototype measured this:
+
+| How different | Could connect at all | Avg shared values |
+|---|---|---|
+| Very similar | 100% | 11.2 |
+| Bridge range | 33% | 1.3 |
+| Most different | **0%** | 0 |
+
+The highest-scoring, most mission-critical connections in the game were **literally impossible** —
+the top bonus was unreachable dead code, while near-identical people had eleven easy options. Scaling
+the band with distance fixes both ends at once: every pair is now reachable, shared values fall
+smoothly from ~10 (similar) to ~1 (most different), and the average best score climbs monotonically
+from 8 to 14. Rare connections stay rare and precious; they just stop being impossible.
+
+It is also the more honest model. Two people whose lives share almost nothing but who both land
+"roughly agree" on one question *have* found real common ground, and the game should say so.
+
+**The moment this produces.** Hassan (60, farms in rural Sohag, Egypt) and Sanne (25, runs a café in
+Amsterdam) are the most different pair in the deck. They share exactly one thing: *"Family comes
+first."* That question is worth 1 point on its own — nearly everyone on Earth agrees with it — but
+bridging that gulf makes it a **+14**, the most valuable link in the game. No one scripted that; it
+fell out of the model. It is also, precisely, the point the game exists to make.
 
 ---
 
 ## 5. Key design forks — analysis & recommendations
 
-The transcript is full of genuine forks left open. Here is each one, the options, and a
-recommendation with reasoning. **Bold = recommended.**
+The transcript is full of genuine forks left open. Here is each one, the options, and the reasoning.
+
+> **Status: all forks below are now DECIDED and built.** The recommended option in each case is
+> implemented in the prototype; Forks D, F and I are deliberately deferred to later versions as
+> described. Fork B was additionally revised during balance testing — see §4, "one counter-intuitive
+> fix".
 
 ### Fork A — What is a card: persona or aggregate group?
 - *Individual persona* (niche, extreme, vivid, high-scoring, hard to match).
@@ -218,19 +251,21 @@ recommendation with reasoning. **Bold = recommended.**
 
 Three modes were floated; they form a clean release ladder.
 
-1. **Solo (MVP, this prototype).** A satisfying single-player puzzle: maximize score from the deck.
-   Provable, shippable, teaches the mechanic. Also the tutorial for everything else.
-2. **Duel / online multiplayer (v2).** Shared board, banked points, the "an Argentine general just
-   crashed my plan" interaction of Fork F. Optional light "break a chain" action as an advanced
-   toggle.
-3. **Global daily (v3 — the retention engine).** Á la the NYT / Dagens Nyheter daily puzzle: three
-   shared **global cards** drop each day; everyone in the world plays the same hand; a **global
-   leaderboard** ranks the longest / highest-scoring chains; a "where in the world is everyone
-   building?" map closes the loop. This mode is both the strongest retention hook *and* the strongest
-   expression of the mission — thousands of strangers, same cards, all hunting for common ground.
+1. **Solo (built).** A satisfying single-player puzzle: maximize score from the deck. Provable,
+   shippable, teaches the mechanic. Also the tutorial for everything else.
+2. **Today's deck (built, client-side).** The daily puzzle's foundation: the deck is shuffled from a
+   date seed, so **everyone in the world gets the same cards today**, and your best score for the day
+   is kept. What is deliberately *not* built is the server half — no global leaderboard is shown,
+   because a fake one would be dishonest. Adding it is a backend task, not a design question.
+3. **Global daily, full version (next — the retention engine).** À la the NYT daily puzzle: the
+   shared deck plus a **global leaderboard** and a "where in the world is everyone building?" map.
+   This is both the strongest retention hook *and* the strongest expression of the mission —
+   thousands of strangers, same cards, all hunting for common ground.
+4. **Duel / online multiplayer (last).** Shared board, banked points, the "an Argentine officer just
+   crashed my plan" interaction of Fork F.
 
-**Recommended sequencing:** nail Solo → prove the fun and the "aha" → Global daily next (cheap
-async multiplayer, huge mission leverage) → synchronous Duel last (hardest to build, smallest reach).
+**Sequencing rationale:** Solo proves the fun and the "aha" → Global daily next (cheap async
+multiplayer, huge mission leverage) → synchronous Duel last (hardest to build, smallest reach).
 
 ---
 
@@ -243,16 +278,17 @@ Research on serious games for empathy is consistent: change comes from **perspec
 Value Chain is aligned by construction — the scoring *is* a perspective-taking incentive — but four
 deliberate touches sharpen it:
 
-- **The reveal on every bridge.** When you connect two distant groups, the game states the shared
-  ground plainly: *"Both ~72/100 on protecting the environment. On almost everything else, these two
-  groups disagree."* That sentence is the entire pedagogy, delivered as a reward.
-- **End-of-round reflection.** Your best bridges replay on a world map — the takeaway is *"look at
-  the unlikely alliances you found,"* not a score alone.
-- **Honest polarization.** The game never pretends everyone secretly agrees. High scores require
-  connecting on genuinely divisive questions — you feel the real fault lines *and* the real overlaps.
-- **Anti-stereotype guardrails** (§9): the transcript worries about "crazy stereotypes"; the design
-  answers by always grounding a persona in visible data and using the *surprise* to break the
-  stereotype the art might imply.
+- **The reveal on every bridge.** When you connect two distant people, the game states the shared
+  ground plainly: *"Hassan and Sanne both say YES. These two live very different lives and disagree
+  about almost everything else — but here they think the same."* That sentence is the entire
+  pedagogy, delivered as a reward rather than a lesson.
+- **End-of-round reflection.** Your best bridges are replayed with each person's job and home
+  restated — the takeaway is *"look at the surprising matches you found,"* not a score alone.
+- **Honest polarization.** The game never pretends everyone secretly agrees. Most pairs disagree
+  about most things, and you see that; high scores require finding the narrow, real overlap.
+- **The deck teaches by structure** (§10.1): because most countries appear several times with
+  different values, a player cannot form the belief that a country has *a* view. This is the
+  guardrail the transcript asked for, made structural instead of cosmetic.
 
 ---
 
@@ -261,15 +297,16 @@ deliberate touches sharpen it:
 The prototype ships with **synthetic data whose structure mirrors the WVS**, so every design decision
 is tested against realistic shapes:
 
-- **8 cultural zones** with base value vectors placed per the Inglehart–Welzel map (Nordic, Anglo,
-  Latin American, Catholic Europe, Orthodox/Ex-Soviet, African-Islamic, Confucian, South Asian).
-- **Demographic modifiers** (young-urban-graduate, older-rural, military, women, business, care-work,
-  farming) applied as deltas — the real WVS metadata axes.
-- **14 dimensions**, a superset of the 10 Inglehart–Welzel indicators plus divorce, gender-at-work,
-  immigration, environment, family importance — each with a polarization weight calibrated to how
-  divided the world actually is on it (family low; abortion/homosexuality/religion high).
-- **Personas** = zone + modifiers + flavour label + a breadth value, with vectors computed by the
-  same engine real data would feed.
+- **8 cultural zones** with base value vectors placed per the Inglehart–Welzel map (Northern Europe,
+  English-speaking, Latin America, Southern Europe, Eastern Europe, Africa & Middle East, East Asia,
+  South Asia).
+- **Life-situation modifiers** (young-urban-graduate, older-rural, military, women, business,
+  care-work, farming, student, urban) applied as deltas — the real WVS metadata axes.
+- **14 questions** (§10.3), each weighted by how divided the world actually is on it — *family comes
+  first* scores 1, *same-sex couples should be accepted* scores 6.
+- **People** = zone + modifiers + name/age/place/job + a breadth value, with vectors computed by the
+  same engine real data would feed. Most countries appear 2–3 times with different modifiers, which
+  is what produces genuine within-country disagreement (§10.1).
 
 **Swapping in real data** is then a data-layer change, not a redesign: replace the computed vectors
 with WVS group means, replace the spreads with real standard deviations, replace the polarization
@@ -282,22 +319,96 @@ synthetic layer is explicitly labelled in the code so it can't be mistaken for r
 
 | Risk | Mitigation |
 |---|---|
-| **Stereotyping** ("crazy stereotypes", per the transcript) | Every persona is grounded in a visible stance profile; the game's *point* is the surprising connection that breaks the stereotype; art stays archetypal-not-caricature; avoid slurs/loaded imagery; label groups as "a typical respondent from …", never "all X are …". |
-| **Misrepresenting the data** | Synthetic data is labelled as such in-code and in-UI; real-data mode must cite wave/year; connections are only claimed where the distribution supports them. |
-| **Reducing people to a number** | Show spread, not just a mean ("this group is *divided* on this"); the reflection screen emphasizes shared humanity, not ranking cultures. |
+| **Stereotyping** ("crazy stereotypes", per the transcript) | The full policy in §10.1: named individuals rather than national archetypes; **most countries appear 2–3 times with different values** so the deck structurally refutes "a country is one thing"; work-based icons, never national clichés; ordinary jobs; no card speaks for a group. |
+| **Misrepresenting the data** | Synthetic data labelled as such in-code and on every card panel; real-data mode must cite wave/year; connections are only claimed where the distribution supports them. |
+| **Reducing people to a number** | Answers read as YES / NO / NOT SURE in full sentences, with numbers behind a toggle; the results screen restates each person's home and job, and emphasizes shared humanity rather than ranking cultures. |
+| **Sensitive topics for a young audience** | Age-appropriate item set (§10.3); neutral, non-judgmental wording; no imagery attached to contested questions. A restorable adult/classroom mode keeps research fidelity available. |
 | **Complexity creep** | Hard MVP scope line (Forks D, I deferred); stats never surfaced to the player (Design goal 4). |
 | **One-note strategy** | Dual scoring paths (surprise vs. resonance, Fork C) keep both "long safe" and "short spicy" viable. |
 
 ---
 
-## 10. What the prototype demonstrates
+## 10. Designing for ages 10+ — and against stereotype
 
-`index.html` is a self-contained, playable **Solo** prototype (open it in any browser — no build, no
-server). It implements: the 14 WVS-grounded dimensions, ~30 persona cards across 8 cultural zones,
-the scaled-agreement connection rule, the no-repeat-dimension constraint, the full three-factor
-scoring with transparent breakdowns, the "bridge reveal", multiple chains on a shared board, the
-market/draw economy, and an end-of-round reflection. It is the concrete answer to *"could you build
-an MVP tomorrow?"* — yes, and here it is.
+Two constraints drove a significant revision: the audience is **10 and up**, and the transcript's own
+worry that personas must not become "crazy stereotypes". They turn out to pull in the same direction.
 
-Everything in §5 that was deferred (coalition mode, duel, global daily) is left as clearly-marked
-extension points rather than half-built.
+### 10.1 The anti-stereotype persona policy
+
+The first draft of the deck was exactly what the transcript feared: *Italian Nonna 🍝*, *Japanese
+Salaryman*, *British Pensioner 🫖*, *Mexican Shop Owner 🌮*. Those are national mascots. A card
+called "Italian Nonna" teaches a player that Italy **is** a nonna. Every one was cut. The rules now:
+
+1. **A card is a person, not a nationality.** Every card has a first name, an age, a place and a job:
+   *"Ananya, 24 · Bengaluru, India · software developer"*. You cannot reduce that to a costume.
+2. **Most countries appear two or three times, with genuinely different values.** This is the single
+   strongest anti-stereotype device available, because it is structural rather than cosmetic — the
+   deck itself refutes "a country is one thing." India is Ananya (24, Bengaluru, software developer),
+   Rajesh (58, rural Bihar, rice farmer) *and* Meera (41, Pune, teacher). Measured in the prototype,
+   same-country pairs sit 10–28 apart on the same distance scale that tops out at 67 — real internal
+   disagreement, not a reskin. A player who connects Rajesh to a Swedish farmer while Ananya sits
+   unconnected has learned something no caption could teach.
+3. **Icons describe work, never nationality.** A stethoscope, a wrench, a laptop. No food, no dress,
+   no national cliché. The flag stays, because where someone lives is a fact about them.
+4. **No card claims to speak for a group.** The card is one person; the panel says outright that they
+   are made up but built from how real people with that age, home and job answered.
+5. **Occupations are ordinary, not exotic.** Bus driver, nurse, factory technician, shop assistant,
+   truck driver — the jobs most people actually have.
+
+### 10.2 What "ages 10+" changed
+
+- **Plain language everywhere.** "Polarization × surprise × niche" became `topic · different lives ·
+  specific people`. "Cultural distance 66" became *"these two live very different lives."*
+- **Whole-number, additive scoring** (§4) so the maths is legible and teaches strategy by being read.
+- **Answers as words, not numbers.** Cards and panels say **YES / NO / NOT SURE**, with the 0–100
+  detail available behind a "See all 14 answers" toggle rather than as a wall of bars.
+- **The panel leads with meaning:** *They say YES to…* / *They say NO to…*, in full sentences.
+- **A five-step illustrated tutorial** replaced a wall of text; a persistent coach line names the next
+  action in one sentence and adapts to game state (including the dead-end case).
+- **No duplicate cards.** Two identical people side by side reads as a bug to a child. Each game
+  deals 32 unique people from a pool of 40, which also improves replayability.
+- **Bigger type, 44px minimum touch targets, visible focus rings.**
+
+### 10.3 Age-appropriate question set — a deliberate trade
+
+The ten Inglehart–Welzel indicators include **abortion**, and the most polarizing WVS items are
+mostly adult-facing. For a 10+ audience the set was adjusted: abortion is **out**; divorce,
+acceptance of same-sex couples and importance of religion **stay** (they carry the polarization the
+scoring needs, and are handled in neutral language); and accessible, genuinely divisive items were
+added — *"children should always obey their parents"*, *"people moving here from other countries make
+it better"*, *"we should help people in other countries"*.
+
+This is a real trade and worth stating plainly: it costs some fidelity to the canonical ten-indicator
+model in exchange for a game a 10-year-old can play at a kitchen table. A **classroom/adult mode**
+that restores the full WVS item set is the obvious toggle, and nothing in the engine prevents it —
+the dimension list is data.
+
+---
+
+## 11. What the prototype demonstrates
+
+`index.html` is a self-contained, playable prototype (open it in any browser — no build, no server).
+It implements the 14 WVS-grounded questions, **40 named people across 8 cultural zones** (32 dealt
+per game, no duplicates), the distance-scaled agreement rule, the no-repeat-question constraint, the
+four-part additive scoring with plain-language breakdowns, the bridge reveal, multiple chains, the
+market/draw economy, the date-seeded "Today's deck", and an end-of-round reflection. It is the
+concrete answer to *"could you build an MVP tomorrow?"* — yes, and here it is.
+
+**Verified in-browser, not just written:** full turn loop (select → place → choose question → score →
+refill); no console errors; daily mode deterministic and distinct from free play; zero duplicate
+cards; and the balance sweep over all 780 possible pairings reported in §4, which is what caught the
+unreachable-bridge defect.
+
+Deferred items (coalition mode, duel, the leaderboard half of the global daily) are clearly-marked
+extension points rather than half-built features.
+
+### Known gaps / next tuning passes
+
+- **Within-country spread is modest for some countries** (Nigeria's two people sit ~14 apart vs.
+  Brazil's ~28). Realistic — the zone effect genuinely dominates demographics in the WVS — but the
+  anti-stereotype payload is strongest where the gap is widest, so it is worth revisiting with real
+  data.
+- **No art.** Cards are typographic; illustration is the obvious next step and carries real
+  stereotype risk, so §10.1's rules should bind the illustrator too.
+- **Game length is untuned.** 32 cards is a guess; needs playtesting with actual 10-year-olds, which
+  is the single most valuable next activity and cannot be substituted with analysis.
