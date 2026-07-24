@@ -385,18 +385,97 @@ the dimension list is data.
 
 ---
 
-## 11. What the prototype demonstrates
+## 11. Engine choice & game feel
 
-`index.html` is a self-contained, playable prototype (open it in any browser — no build, no server).
-It implements the 14 WVS-grounded questions, **40 named people across 8 cultural zones** (32 dealt
-per game, no duplicates), the distance-scaled agreement rule, the no-repeat-question constraint, the
-four-part additive scoring with plain-language breakdowns, the bridge reveal, multiple chains, the
-market/draw economy, the date-seeded "Today's deck", and an end-of-round reflection. It is the
-concrete answer to *"could you build an MVP tomorrow?"* — yes, and here it is.
+### 11.1 Fork J — what to build the public prototype on
+
+The obvious answer is "use a game engine." For *this* game it's the wrong one, and the reason is
+specific rather than ideological.
+
+| Option | Verdict |
+|---|---|
+| **Phaser 3** (MIT, full 2D framework) | Rejected. Renders text as canvas textures — and every card here carries five text fields, with fourteen full sentences behind it. That costs crisp text at any DPI, screen-reader access, free responsive reflow, and cheap translation. Translation matters more than usual for a game about international understanding. |
+| **PixiJS** (MIT, renderer only) | Rejected for the same text reasons, and it has no scene/input/audio layer, so we'd rebuild what we already have. |
+| **Godot 4 web export** (MIT) | Rejected for *public prototyping*: a 20 MB+ WASM payload for a link people are meant to click casually, and a GUI-driven workflow that can't live in one reviewable file. |
+| **boardgame.io** (MIT, turn-based state + networking) | **Adopted — but later.** It solves state, turn order, replay and multiplayer, which is exactly the v2 need. It is not a rendering layer, so it doesn't conflict with anything below. |
+| **DOM + CSS transforms + Web Animations API + WebAudio** | **Adopted now.** Crisp text, free accessibility and i18n, GPU-composited transforms, zero install, zero build, a single file anyone can open or host. |
+
+**→ Recommendation: DOM now, boardgame.io when multiplayer lands, canvas only where it earns its
+place.** The one thing genuinely better on canvas is the particle system, so that — and only that —
+is a canvas overlay. Reach for the engine when the problem is *simulation*; this problem is
+*interface*.
+
+Everything is synthesized at runtime, including audio, so the whole game stays one self-contained
+file with no external requests.
+
+### 11.2 Visual identity — risograph zine
+
+The earlier build looked like a fintech dashboard: dark navy, one teal accent, rounded cards with an
+accent rail. That is the house style of every AI-generated UI, and it is not a look a 13-year-old
+wants to touch.
+
+The direction is **risograph print**: flat spot inks overprinted with `multiply`, a halftone dot
+screen, thick keylines, hard offset shadows, and deliberate misregistration — cards sit a degree or
+two off-square, ink blocks are nudged out of alignment. Type is a condensed poster face (Impact and
+its metric cousins, present on every OS, so no webfont request and no silent fallback) against a
+plain system sans, with tabular mono for anything numeric.
+
+Two consequences worth recording:
+
+- **Multi-ink, not one accent.** Six inks carry meaning — each person's blob is coloured by cultural
+  zone, so "these two are from different worlds" is legible before you read a word. That doubles as a
+  play cue for hunting bridges.
+- **No emoji anywhere.** Full-colour emoji clash with flat inks, and flag emoji silently degrade to
+  letter pairs on Windows — bad in a game whose whole subject is countries. Each person gets an
+  ink blob with their initial instead.
+
+Dark mode is not an inversion: it is the same inks printed on black stock, which is a real riso
+technique.
+
+### 11.3 Game feel
+
+Balatro is the reference for turning arithmetic into a physical event: dense feedback, short readable
+micro-animations, and — the detail worth stealing — **count-up ticks whose pitch rises with the
+number**, so the score lands on two senses at once
+([design analysis](https://medium.com/@yyh19971004/balatro-design-analysis-visual-packaging-and-interactive-feedback-cc6fa6a65370)).
+
+Implemented: a fanned hand that lifts and straightens on hover; cards that flip to reveal all
+fourteen answers; a score that punches and counts up with rising-pitch ticks; ink-splat particles
+scaled to the points scored; screen shake reserved for bridges; a tilted BRIDGE! banner naming both
+people and what they share; and synthesized sound throughout (pick, place, flip, deal, deny,
+arpeggio on a bridge). All of it respects `prefers-reduced-motion`.
+
+The scoring escalation is the point: a routine link gives a small splat, a bridge shakes the screen.
+The feedback teaches the strategy without a tutorial.
+
+### 11.4 Layout notes
+
+Three bugs found by measuring rather than eyeballing, worth recording because they'd recur:
+
+- The hand fan was sized before the market rendered, so it measured a container that was still
+  full-width and overflowed by 250px. The fan is now sized in a `requestAnimationFrame` after layout
+  settles, and recomputed on resize.
+- Rotating a card inflates its bounding box (a 150×184 card at 7.8° is 203 tall), which clipped the
+  bottom row against the viewport. The fan now lifts its *middle* rather than pushing its edges down.
+- **A 7-card fan cannot stay legible at 375px.** Below 620px the hand becomes a swipe row with no
+  overlap and no rotation, so every card keeps its full name and place.
+
+---
+
+## 12. What the prototype demonstrates
+
+`index.html` is a self-contained, playable prototype (open it in any browser — no build, no server,
+no external requests). It implements the 14 WVS-grounded questions, **40 named people across 8
+cultural zones** (32 dealt per game, no duplicates), the distance-scaled agreement rule, the
+no-repeat-question constraint, the four-part additive scoring with plain-language breakdowns, the
+bridge moment, multiple chains, the market/draw economy, card flip-to-inspect, the date-seeded
+"Today's deck", full game feel (§11.3), light/dark, and an end-of-round reflection.
 
 **Verified in-browser, not just written:** full turn loop (select → place → choose question → score →
-refill); no console errors; daily mode deterministic and distinct from free play; zero duplicate
-cards; and the balance sweep over all 780 possible pairings reported in §4, which is what caught the
+refill); 25 bot-simulated games with zero errors and stable balance (avg 322 points, 3.4 bridges, 31
+links); no console errors; daily mode deterministic and distinct from free play; zero duplicate
+cards; layout measured at desktop and 375px with no clipping, overlap or horizontal scroll; and the
+balance sweep over all 780 possible pairings reported in §4, which is what caught the
 unreachable-bridge defect.
 
 Deferred items (coalition mode, duel, the leaderboard half of the global daily) are clearly-marked
@@ -408,7 +487,10 @@ extension points rather than half-built features.
   Brazil's ~28). Realistic — the zone effect genuinely dominates demographics in the WVS — but the
   anti-stereotype payload is strongest where the gap is widest, so it is worth revisiting with real
   data.
-- **No art.** Cards are typographic; illustration is the obvious next step and carries real
-  stereotype risk, so §10.1's rules should bind the illustrator too.
+- **No illustration.** Cards are typographic by design (§11.2). Adding portraits is the obvious next
+  step and carries the most stereotype risk in the whole project, so §10.1's rules must bind the
+  illustrator too — arguably harder there than in text.
+- **No drag-and-drop.** Play is tap-to-select then tap-to-place, which is reliable across mouse and
+  touch. Real dragging would feel better and is the next feel upgrade.
 - **Game length is untuned.** 32 cards is a guess; needs playtesting with actual 10-year-olds, which
   is the single most valuable next activity and cannot be substituted with analysis.

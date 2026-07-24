@@ -35,6 +35,22 @@ connect on — that's the whole game.
 There are two modes: **Free play** (random deck) and **Today's deck** (seeded by date, so everyone
 gets the same cards on the same day).
 
+## Look, feel, and what it's built on
+
+Visual identity is **risograph zine** — flat spot inks, halftone, thick keylines, deliberate print
+misregistration, condensed poster type. Deliberately not the dark-navy-plus-one-teal-accent look the
+earlier build had.
+
+It is built on **plain DOM + Web Animations API + WebAudio**, not a game engine. That's a considered
+call, not laziness: Phaser and Pixi render text as canvas textures, and these cards are text-dense,
+which would cost crisp type, screen-reader access and cheap translation — the last mattering a lot
+for a game about international understanding. Canvas is used for exactly one thing, the particle
+system, because that's the one thing it's better at. **boardgame.io** (MIT) is the recommended engine
+for the multiplayer layer when that lands. Full reasoning in [DESIGN.md §11](DESIGN.md).
+
+Sound is synthesized at runtime, so there are no audio assets and no external requests — the whole
+game is one file.
+
 ## Status
 
 Concept + working prototype, verified in-browser. Data is **synthetic** but structured to mirror real
