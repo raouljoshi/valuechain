@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Value Chain — prototype</title>
+<style>
+  :root{
+    --bg:#10131f; --bg2:#161a2b; --panel:#1c2136; --panel2:#232a45;
+    --ink:#eef1fb; --muted:#9aa3c7; --faint:#6b7399;
+    --gold:#f2c14e; --gold-dim:#c8992f;
+    --teal:#38d6c4; --bridge:#5ad1ff; --bond:#ff9d6e;
+    --line:#2c3352; --good:#57d38c; --bad:#ff6b7d;
+    --card:#f4efe3; --card-ink:#20232f;
+    --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.35);
+    --z-nordic:#5ad1ff; --z-anglo:#8f7dff; --z-latin:#ff9d6e; --z-cath:#f2c14e;
+    --z-orth:#c46bff; --z-afrme:#57d38c; --z-conf:#ff6b9d; --z-sasia:#e0b34a; --z-global:#9aa3c7;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 700px at 70% -10%,#20264a 0%,var(--bg) 55%);color:var(--ink);min-height:100vh}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;color:var(--ink);background:var(--panel2);padding:8px 14px;font-size:13px;font-weight:600;transition:.12s}
+  button:hover{filter:brightness(1.14)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .btn-gold{background:linear-gradient(180deg,var(--gold),var(--gold-dim));color:#241c05}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+
+  header{display:flex;align-items:center;gap:18px;padding:12px 20px;border-bottom:1px solid var(--line);background:rgba(16,19,31,.75);backdrop-filter:blur(6px);position:sticky;top:0;z-index:40}
+  .logo{font-weight:800;font-size:19px;letter-spacing:.3px}
+  .logo b{color:var(--gold)}
+  .logo small{display:block;font-size:10px;font-weight:600;color:var(--faint);letter-spacing:1.5px;text-transform:uppercase}
+  .stats{display:flex;gap:22px;margin-left:6px}
+  .stat{line-height:1}
+  .stat .n{font-size:22px;font-weight:800;color:var(--gold)}
+  .stat .l{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:1px}
+  header .spacer{flex:1}
+
+  .layout{display:grid;grid-template-columns:1fr 320px;gap:0;min-height:calc(100vh - 58px)}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}}
+
+  .board-wrap{padding:18px 20px 220px;overflow:auto}
+  .hint{color:var(--muted);font-size:13px;margin:2px 0 14px;min-height:20px}
+  .hint b{color:var(--teal)}
+  .chains{display:flex;flex-direction:column;gap:16px}
+
+  .chain{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;overflow-x:auto;padding:10px;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent);border:1px solid var(--line);border-radius:var(--radius);min-height:150px}
+  .chain::-webkit-scrollbar{height:8px}
+  .chain::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+
+  .card{position:relative;width:118px;min-width:118px;background:var(--card);color:var(--card-ink);border-radius:12px;padding:9px 9px 8px;box-shadow:var(--shadow);border-left:5px solid var(--z-global);user-select:none}
+  .card .flag{font-size:26px;line-height:1}
+  .card .emoji{position:absolute;top:8px;right:8px;font-size:16px;opacity:.85}
+  .card .name{font-weight:750;font-size:12px;line-height:1.15;margin-top:5px;min-height:42px;color:#20232f}
+  .card .breadth{display:flex;gap:2px;margin-top:5px;align-items:center}
+  .card .breadth i{width:6px;height:6px;border-radius:50%;background:#c9c1ad;display:inline-block}
+  .card .breadth i.on{background:#20232f}
+  .card .breadth span{font-size:8px;color:#8a8368;text-transform:uppercase;letter-spacing:.5px;margin-left:3px}
+  .card .sig{margin-top:6px;font-size:9.5px;color:#5c5847;border-top:1px dashed #ccc3ad;padding-top:5px;line-height:1.25}
+  .card .sig b{color:#20232f}
+  .card.in-hand{cursor:pointer;transition:transform .1s, box-shadow .1s}
+  .card.in-hand:hover{transform:translateY(-6px)}
+  .card.selected{outline:3px solid var(--gold);outline-offset:2px;transform:translateY(-8px)}
+  .card.dim{opacity:.4}
+  .card.playable-glow{outline:2px solid var(--teal)}
+
+  .link{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:70px;padding:0 4px}
+  .link .wire{width:100%;height:2px;background:repeating-linear-gradient(90deg,var(--gold) 0 6px,transparent 6px 11px)}
+  .link .chip{margin:5px 0;background:var(--panel2);border:1px solid var(--gold-dim);border-radius:20px;padding:3px 8px;text-align:center;white-space:nowrap}
+  .link .chip .d{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .link .chip .p{font-size:13px;font-weight:800;color:var(--gold)}
+  .link.bridge .chip{border-color:var(--bridge);box-shadow:0 0 10px rgba(90,209,255,.3)}
+  .link.bridge .chip .p{color:var(--bridge)}
+  .link.bond .chip{border-color:var(--bond)}
+  .link.bond .chip .p{color:var(--bond)}
+
+  .slot{width:66px;min-width:66px;height:132px;border:2px dashed var(--teal);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;background:rgba(56,214,196,.06);color:var(--teal);font-size:10px;text-align:center;transition:.12s}
+  .slot:hover{background:rgba(56,214,196,.16)}
+  .slot .plus{font-size:22px;line-height:1}
+  .slot .best{font-weight:800;font-size:12px}
+  .newchain{align-self:center;width:120px;min-height:132px;border:2px dashed var(--line);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--faint);font-size:11px;cursor:pointer;gap:6px}
+  .newchain.active{border-color:var(--teal);color:var(--teal);background:rgba(56,214,196,.06)}
+  .newchain .plus{font-size:26px}
+
+  /* dimension picker popover */
+  .picker{position:fixed;z-index:60;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:8px;min-width:220px}
+  .picker h4{margin:2px 6px 8px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+  .picker .opt{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer}
+  .picker .opt:hover{background:var(--panel2)}
+  .picker .opt .dn{font-size:12.5px;font-weight:600}
+  .picker .opt .dn small{display:block;color:var(--faint);font-size:10px;font-weight:500}
+  .picker .opt .pv{font-weight:800;color:var(--gold);font-size:15px}
+  .picker .opt.bridge .pv{color:var(--bridge)}
+  .picker .opt.bond .pv{color:var(--bond)}
+
+  /* right info panel */
+  .side{border-left:1px solid var(--line);background:var(--bg2);padding:16px;overflow:auto}
+  @media(max-width:900px){.side{border-left:none;border-top:1px solid var(--line)}}
+  .side h3{margin:0 0 4px;font-size:13px;letter-spacing:.5px}
+  .side .zone-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;background:var(--panel2);color:var(--muted);margin-bottom:10px}
+  .side .empty{color:var(--faint);font-size:13px;line-height:1.5}
+  .stancebar{margin:7px 0}
+  .stancebar .top{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px}
+  .stancebar .top .lab{color:var(--muted)}
+  .stancebar .top .val{color:var(--ink);font-weight:700}
+  .stancebar .track{height:7px;background:var(--panel2);border-radius:6px;position:relative;overflow:hidden}
+  .stancebar .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--teal),var(--gold))}
+  .stancebar .pol{font-size:9px;color:var(--faint)}
+  .divtag{font-size:9px;padding:1px 5px;border-radius:6px;margin-left:6px}
+  .divtag.united{background:rgba(87,211,140,.15);color:var(--good)}
+  .divtag.divided{background:rgba(255,107,125,.15);color:var(--bad)}
+
+  /* bottom tray */
+  .tray{position:fixed;bottom:0;left:0;right:320px;background:linear-gradient(180deg,rgba(22,26,43,.4),var(--bg2) 40%);border-top:1px solid var(--line);padding:10px 16px 12px;z-index:30;backdrop-filter:blur(8px)}
+  @media(max-width:900px){.tray{right:0}}
+  .tray .row{display:flex;align-items:flex-end;gap:14px}
+  .tray .label{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:1px;margin:0 0 6px 2px}
+  .hand{display:flex;gap:8px;flex-wrap:wrap}
+  .market{display:flex;gap:8px;padding-left:14px;border-left:1px solid var(--line)}
+  .pile{width:80px;min-width:80px;height:132px;border-radius:12px;background:repeating-linear-gradient(135deg,#2a3152 0 8px,#232a45 8px 16px);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;font-size:11px;gap:4px}
+  .pile.draw{outline:2px solid var(--teal);color:var(--teal)}
+  .pile .cnt{font-size:22px;font-weight:800;color:var(--ink)}
+  .market .card.draw{outline:2px solid var(--teal);cursor:pointer}
+  .card.mkt{cursor:default}
+
+  /* toast */
+  #toasts{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none;width:min(560px,92vw)}
+  .toast{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:12px 16px;animation:pop .3s ease;opacity:1;transition:opacity .5s}
+  .toast.bridge{border-color:var(--bridge);box-shadow:0 0 30px rgba(90,209,255,.25)}
+  .toast.bond{border-color:var(--bond)}
+  .toast .head{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px}
+  .toast .head .tag{font-size:11px;letter-spacing:1.5px;padding:2px 8px;border-radius:20px;text-transform:uppercase}
+  .toast.bridge .tag{background:var(--bridge);color:#052330}
+  .toast.bond .tag{background:var(--bond);color:#3a1607}
+  .toast.link .tag{background:var(--panel2);color:var(--muted)}
+  .toast .pts{margin-left:auto;font-size:22px;font-weight:900;color:var(--gold)}
+  .toast .who{font-size:13px;margin-top:6px;color:var(--ink)}
+  .toast .why{font-size:12px;margin-top:4px;color:var(--muted)}
+  .toast .math{font-size:10.5px;margin-top:6px;color:var(--faint);font-family:ui-monospace,Menlo,monospace}
+  @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+
+  /* modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(6,8,15,.72);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+  .modal{background:var(--bg2);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);max-width:620px;width:100%;max-height:88vh;overflow:auto;padding:26px}
+  .modal h2{margin:0 0 4px;font-size:24px}
+  .modal h2 b{color:var(--gold)}
+  .modal .sub{color:var(--muted);margin:0 0 18px;font-size:13px}
+  .modal p{color:var(--ink);font-size:13.5px;line-height:1.6}
+  .modal ul{color:var(--muted);font-size:13px;line-height:1.7;padding-left:18px}
+  .modal .big{font-size:52px;font-weight:900;color:var(--gold);text-align:center;line-height:1}
+  .modal .bigl{text-align:center;color:var(--faint);text-transform:uppercase;letter-spacing:2px;font-size:11px;margin-bottom:16px}
+  .reflect{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0}
+  .reflect .r-tag{font-size:10px;color:var(--bridge);letter-spacing:1px;text-transform:uppercase;font-weight:700}
+  .reflect .r-who{font-size:14px;font-weight:700;margin:3px 0}
+  .reflect .r-why{font-size:12px;color:var(--muted)}
+  .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+  kbd{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:11px;color:var(--muted)}
+  .synthnote{font-size:11px;color:var(--faint);border-top:1px solid var(--line);margin-top:16px;padding-top:10px;line-height:1.5}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">VALUE <b>CHAIN</b><small>Prototype · synthetic data</small></div>
+  <div class="stats">
+    <div class="stat"><div class="n" id="s-score">0</div><div class="l">Score</div></div>
+    <div class="stat"><div class="n" id="s-links">0</div><div class="l">Links</div></div>
+    <div class="stat"><div class="n" id="s-bridges">0</div><div class="l">Bridges</div></div>
+    <div class="stat"><div class="n" id="s-pile">0</div><div class="l">Deck left</div></div>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn-ghost" id="btn-help">How to play</button>
+  <button class="btn-ghost" id="btn-finish">Finish round</button>
+  <button class="btn-gold" id="btn-new">New game</button>
+</header>
+
+<div class="layout">
+  <div class="board-wrap">
+    <div class="hint" id="hint"></div>
+    <div class="chains" id="chains"></div>
+  </div>
+  <aside class="side" id="side">
+    <div class="empty">Hover or select a card to inspect a group's full value profile — the 14
+    survey dimensions this group answers, and how divided the world is on each.</div>
+  </aside>
+</div>
+
+<div class="tray">
+  <div class="row">
+    <div>
+      <div class="label">Your hand</div>
+      <div class="hand" id="hand"></div>
+    </div>
+    <div>
+      <div class="label">Market</div>
+      <div class="market" id="market">
+        <div class="pile" id="pile"><div class="cnt" id="pile-cnt">0</div>draw pile</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<div id="modal-root"></div>
+
+<script>
+/* ============================================================================
+   VALUE CHAIN — playable solo prototype
+   ----------------------------------------------------------------------------
+   SYNTHETIC DATA, honestly labelled. The numbers below are invented but their
+   STRUCTURE mirrors the World Values Survey / Inglehart–Welzel model:
+     · cultural "zones" are placed per the two-axis cultural map
+       (Traditional↔Secular-rational, Survival↔Self-expression)
+     · demographic modifiers mirror real WVS metadata (age/education/urban/gender/work)
+     · per-dimension "polarization" mirrors how divided the world really is on each item
+   To go live you swap these computed vectors for real WVS group means + std-devs.
+   ============================================================================ */
+
+/* ---- 14 value dimensions (superset of the 10 Inglehart–Welzel indicators) ---- */
+const DIMS = [
+  {id:'religion', label:'Religion is central to my life',        short:'Religion',     pol:0.90},
+  {id:'abortion', label:'Abortion can be justified',             short:'Abortion',     pol:0.95},
+  {id:'homo',     label:'Homosexuality is acceptable',           short:'LGBT accept.', pol:0.95},
+  {id:'gender',   label:'Men & women deserve equal jobs',        short:'Gender equal', pol:0.72},
+  {id:'divorce',  label:'Divorce can be justified',              short:'Divorce',      pol:0.78},
+  {id:'nation',   label:'I am very proud of my nation',          short:'Nationalism',  pol:0.68},
+  {id:'immig',    label:'Immigration is good for my country',    short:'Immigration',  pol:0.70},
+  {id:'trust',    label:'Most people can be trusted',            short:'Trust',        pol:0.55},
+  {id:'author',   label:'More respect for authority is good',    short:'Authority',    pol:0.52},
+  {id:'obey',     label:'Children should learn obedience',       short:'Obedience',    pol:0.55},
+  {id:'environ',  label:'Protect environment over growth',       short:'Environment',  pol:0.48},
+  {id:'democ',    label:'Democracy is essential',                short:'Democracy',    pol:0.42},
+  {id:'work',     label:'Hard work brings a better life',        short:'Hard work',    pol:0.38},
+  {id:'family',   label:'Family is very important to me',        short:'Family',       pol:0.15},
+];
+const DI = Object.fromEntries(DIMS.map((d,i)=>[d.id,i]));
+
+/* ---- 8 cultural zones, positioned on the Inglehart–Welzel map ---- */
+const ZONES = {
+  nordic:  {name:'Nordic / Protestant',   color:'z-nordic', v:{religion:20,abortion:78,homo:88,gender:92,divorce:85,nation:45,immig:65,trust:68,author:30,obey:25,environ:78,democ:88,work:40,family:82}},
+  anglo:   {name:'English-speaking',      color:'z-anglo',  v:{religion:60,abortion:55,homo:68,gender:82,divorce:70,nation:78,immig:55,trust:42,author:55,obey:45,environ:52,democ:80,work:80,family:85}},
+  latin:   {name:'Latin American',        color:'z-latin',  v:{religion:68,abortion:40,homo:58,gender:72,divorce:62,nation:72,immig:50,trust:25,author:55,obey:55,environ:62,democ:68,work:70,family:92}},
+  cath:    {name:'Catholic Europe',       color:'z-cath',   v:{religion:45,abortion:60,homo:74,gender:84,divorce:72,nation:55,immig:52,trust:42,author:45,obey:40,environ:68,democ:82,work:55,family:88}},
+  orth:    {name:'Orthodox / Ex-Soviet',  color:'z-orth',   v:{religion:55,abortion:55,homo:22,gender:64,divorce:62,nation:72,immig:34,trust:30,author:64,obey:56,environ:48,democ:54,work:55,family:86}},
+  afrme:   {name:'African / Middle-East', color:'z-afrme',  v:{religion:95,abortion:12,homo:6, gender:38,divorce:28,nation:84,immig:40,trust:22,author:80,obey:80,environ:55,democ:60,work:74,family:95}},
+  conf:    {name:'Confucian / East Asia', color:'z-conf',   v:{religion:25,abortion:62,homo:44,gender:62,divorce:55,nation:64,immig:36,trust:46,author:62,obey:56,environ:58,democ:56,work:80,family:84}},
+  sasia:   {name:'South Asian',           color:'z-sasia',  v:{religion:88,abortion:34,homo:26,gender:52,divorce:40,nation:82,immig:42,trust:30,author:74,obey:74,environ:60,democ:66,work:82,family:94}},
+};
+/* global = the world's average zone (broad aggregate cards sit here) */
+(function(){
+  const acc={}; DIMS.forEach(d=>acc[d.id]=0);
+  const zs=Object.values(ZONES); zs.forEach(z=>DIMS.forEach(d=>acc[d.id]+=z.v[d.id]));
+  const v={}; DIMS.forEach(d=>v[d.id]=Math.round(acc[d.id]/zs.length));
+  ZONES.global={name:'Global average',color:'z-global',v};
+})();
+
+/* ---- demographic modifiers (mirror WVS metadata axes), applied as deltas ---- */
+const MODS = {
+  youngUrbanGrad:{religion:-16,abortion:12,homo:20,gender:12,divorce:12,nation:-8,immig:12,trust:4,author:-12,obey:-16,environ:12,democ:4,work:-6,family:-4},
+  olderRural:    {religion:12,abortion:-12,homo:-16,gender:-12,divorce:-10,nation:8,immig:-10,trust:-2,author:12,obey:16,environ:-4,democ:-4,work:4,family:4},
+  military:      {nation:18,author:20,obey:12,work:8,gender:-8,immig:-8,homo:-8,trust:-6},
+  women:         {gender:9,environ:6,nation:-6,author:-5,work:-4,homo:3},
+  business:      {work:12,environ:-10,trust:8,author:6,immig:5,democ:-2},
+  care:          {environ:8,gender:8,trust:8,author:-6,homo:5,work:-6},
+  farming:       {religion:7,obey:8,environ:-6,trust:-5,author:6,work:4,immig:-5},
+  urbanGlobal:   {religion:-6,homo:6,environ:4,immig:4,author:-4},
+};
+
+/* ---- persona cards: zone + modifiers + flavour + breadth (1 niche … 5 broad) ---- */
+const PERSONAS = [
+  {id:'ar_mil', name:'Argentine Army Officer',      flag:'🇦🇷', emoji:'🎖️', zone:'latin', mods:['military'],               breadth:1},
+  {id:'se_pre', name:'Swedish Preschool Teacher',   flag:'🇸🇪', emoji:'🧸', zone:'nordic',mods:['care','women'],           breadth:1},
+  {id:'in_far', name:'Indian Smallholder Farmer',   flag:'🇮🇳', emoji:'🌾', zone:'sasia', mods:['farming','olderRural'],   breadth:1},
+  {id:'eg_eld', name:'Egyptian Village Elder',      flag:'🇪🇬', emoji:'🕌', zone:'afrme', mods:['olderRural'],             breadth:2},
+  {id:'us_eng', name:'Silicon Valley Engineer',     flag:'🇺🇸', emoji:'💻', zone:'anglo', mods:['youngUrbanGrad','business'],breadth:1},
+  {id:'jp_sal', name:'Japanese Salaryman',          flag:'🇯🇵', emoji:'💼', zone:'conf',  mods:['business'],               breadth:2},
+  {id:'ng_tra', name:'Nigerian Market Trader',      flag:'🇳🇬', emoji:'🧺', zone:'afrme', mods:['business'],               breadth:2},
+  {id:'br_stu', name:'Brazilian University Student',flag:'🇧🇷', emoji:'🎓', zone:'latin', mods:['youngUrbanGrad'],         breadth:2},
+  {id:'ru_wor', name:'Russian Factory Worker',      flag:'🇷🇺', emoji:'🔧', zone:'orth',  mods:[],                        breadth:2},
+  {id:'pl_gra', name:'Polish Catholic Grandmother', flag:'🇵🇱', emoji:'⛪', zone:'cath',  mods:['olderRural','women'],     breadth:1},
+  {id:'nl_cre', name:'Amsterdam Creative',          flag:'🇳🇱', emoji:'🚲', zone:'nordic',mods:['youngUrbanGrad'],         breadth:2},
+  {id:'kr_gra', name:'South Korean New Graduate',   flag:'🇰🇷', emoji:'📱', zone:'conf',  mods:['youngUrbanGrad'],         breadth:2},
+  {id:'mx_biz', name:'Mexican Shop Owner',          flag:'🇲🇽', emoji:'🌮', zone:'latin', mods:['business'],               breadth:2},
+  {id:'pk_dri', name:'Pakistani Truck Driver',      flag:'🇵🇰', emoji:'🚚', zone:'afrme', mods:[],                        breadth:2},
+  {id:'fr_uni', name:'French Union Worker',         flag:'🇫🇷', emoji:'✊', zone:'cath',  mods:[],                        breadth:2},
+  {id:'us_evm', name:'American Evangelical Mother', flag:'🇺🇸', emoji:'✝️', zone:'anglo', mods:['women','olderRural'],     breadth:1},
+  {id:'ke_nur', name:'Kenyan Nurse',                flag:'🇰🇪', emoji:'🩺', zone:'afrme', mods:['care','women'],           breadth:1},
+  {id:'cn_ent', name:'Chinese Tech Entrepreneur',   flag:'🇨🇳', emoji:'🏭', zone:'conf',  mods:['business','youngUrbanGrad'],breadth:1},
+  {id:'it_non', name:'Italian Nonna',               flag:'🇮🇹', emoji:'🍝', zone:'cath',  mods:['olderRural','women'],     breadth:1},
+  {id:'no_oil', name:'Norwegian Oil Engineer',      flag:'🇳🇴', emoji:'🛢️', zone:'nordic',mods:['business'],               breadth:2},
+  {id:'tr_sho', name:'Turkish Shopkeeper',          flag:'🇹🇷', emoji:'🛒', zone:'afrme', mods:['business'],               breadth:2},
+  {id:'co_cof', name:'Colombian Coffee Farmer',     flag:'🇨🇴', emoji:'☕', zone:'latin', mods:['farming'],               breadth:1},
+  {id:'gb_pen', name:'British Pensioner',           flag:'🇬🇧', emoji:'🫖', zone:'anglo', mods:['olderRural'],             breadth:2},
+  {id:'id_tea', name:'Indonesian Teacher',          flag:'🇮🇩', emoji:'📚', zone:'afrme', mods:['care'],                  breadth:2},
+  {id:'ca_act', name:'Canadian Climate Activist',   flag:'🇨🇦', emoji:'🌲', zone:'anglo', mods:['youngUrbanGrad','care'], breadth:1},
+  {id:'de_nur', name:'German Auto Worker',          flag:'🇩🇪', emoji:'🚗', zone:'cath',  mods:['business'],               breadth:2},
+  /* broad aggregate cards — near the world mean, easy to match, low points */
+  {id:'agg_wom', name:'Women, worldwide',           flag:'🌍', emoji:'♀️', zone:'global',mods:['women'],                 breadth:5},
+  {id:'agg_you', name:'People under 30, worldwide', flag:'🌍', emoji:'🧑', zone:'global',mods:['youngUrbanGrad'],        breadth:5},
+  {id:'agg_urb', name:'City dwellers, worldwide',   flag:'🌍', emoji:'🏙️', zone:'global',mods:['urbanGlobal'],           breadth:4},
+  {id:'agg_rur', name:'Rural traditionalists',      flag:'🌍', emoji:'🌾', zone:'global',mods:['olderRural','farming'],  breadth:4},
+  {id:'agg_all', name:'Everyone (global average)',  flag:'🌍', emoji:'🌐', zone:'global',mods:[],                        breadth:5},
+];
+
+/* ============================ ENGINE ============================ */
+const clamp=(x)=>Math.max(0,Math.min(100,x));
+function vectorFor(p){
+  const base=ZONES[p.zone].v; const v={};
+  DIMS.forEach(d=>{ let x=base[d.id]; p.mods.forEach(m=>{ if(MODS[m] && MODS[m][d.id]!=null) x+=MODS[m][d.id]; }); v[d.id]=clamp(Math.round(x)); });
+  return v;
+}
+PERSONAS.forEach(p=>{ p.v=vectorFor(p); p.zoneName=ZONES[p.zone].name; p.zoneColor=ZONES[p.zone].color; });
+
+const nicheOf=(b)=>({1:1.0,2:0.8,3:0.6,4:0.4,5:0.2}[b]); // niche-ness 0..1
+const spreadOf=(b)=> 4 + (b-1)*4;                         // internal spread ±, for flavour
+function tolerance(a,b){ return 12 + (a.breadth-1)*1.5 + (b.breadth-1)*1.5; }
+function culturalDistance(a,b){ // RMS of per-dimension gaps, 0..100
+  let s=0; DIMS.forEach(d=>{const g=a.v[d.id]-b.v[d.id]; s+=g*g;});
+  return Math.sqrt(s/DIMS.length);
+}
+function agreesOn(a,b,dimId){ return Math.abs(a.v[dimId]-b.v[dimId]) <= tolerance(a,b); }
+
+function scoreLink(a,b,dimId){
+  const dim=DIMS[DI[dimId]];
+  const polBase   = 30 + dim.pol*130;                       // 50 (family) … 154 (abortion)
+  const dist      = culturalDistance(a,b);
+  const surprise  = 1 + Math.min(dist,70)/50;               // 1.0 … 2.4
+  const avgNiche  = (nicheOf(a.breadth)+nicheOf(b.breadth))/2;
+  const niche     = 1 + avgNiche*0.6;                       // 1.12 … 1.6
+  const tight     = Math.abs(a.v[dimId]-b.v[dimId]) <= 5;
+  const resonance = (tight && a.breadth<=2 && b.breadth<=2) ? Math.round(polBase*0.5*avgNiche) : 0;
+  const total     = Math.round(polBase*surprise*niche) + resonance;
+  let kind='link';
+  if(dist>=45) kind='bridge';
+  else if(resonance>0) kind='bond';
+  return {total,polBase:Math.round(polBase),dist:Math.round(dist),surprise:+surprise.toFixed(2),niche:+niche.toFixed(2),resonance,kind,dimId,tight};
+}
+
+/* ============================ STATE ============================ */
+let S;
+function newGame(){
+  const deck=[];
+  PERSONAS.forEach(p=>deck.push(p));
+  // add a second copy of ~half the personas (deterministic duplicates are fine)
+  shuffle(PERSONAS.slice()).slice(0,16).forEach(p=>deck.push(p));
+  shuffle(deck);
+  S={ deck, hand:[], market:[], chains:[], score:0, links:0, bridges:0,
+      bridgeLog:[], selected:null, phase:'select' /* 'select' | 'refill' | 'over' */ };
+  for(let i=0;i<7;i++) S.hand.push(S.deck.pop());
+  for(let i=0;i<3;i++) if(S.deck.length) S.market.push(S.deck.pop());
+  closePicker(); render();
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+/* valid placements for the currently selected card */
+function endDimTail(ch){ return ch.links.length? ch.links[ch.links.length-1].dimId : null; }
+function endDimHead(ch){ return ch.links.length? ch.links[0].dimId : null; }
+function validDims(a,b,excludeDim){
+  return DIMS.filter(d=> d.id!==excludeDim && agreesOn(a,b,d.id))
+             .map(d=>scoreLink(a,b,d.id)).sort((x,y)=>y.total-x.total);
+}
+function placementsFor(card){
+  const res={tails:[],heads:[]};
+  S.chains.forEach((ch,ci)=>{
+    const tail=ch.nodes[ch.nodes.length-1], head=ch.nodes[0];
+    const t=validDims(tail,card,endDimTail(ch)); if(t.length) res.tails.push({ci,best:t[0].total,opts:t});
+    if(ch.nodes.length>1 || true){ const h=validDims(head,card,endDimHead(ch)); if(h.length) res.heads.push({ci,best:h[0].total,opts:h}); }
+  });
+  return res;
+}
+
+/* ============================ ACTIONS ============================ */
+function selectHand(idx){
+  if(S.phase!=='select') return;
+  S.selected = (S.selected===idx)? null : idx;
+  render();
+}
+function startNewChain(){
+  if(S.phase!=='select'||S.selected==null) return;
+  const card=S.hand[S.selected];
+  S.chains.push({nodes:[card],links:[]});
+  removeFromHand(S.selected); S.selected=null; enterRefill();
+}
+function placeOnChain(ci,end,dimId){
+  const card=S.hand[S.selected];
+  const ch=S.chains[ci];
+  const anchor = end==='tail'? ch.nodes[ch.nodes.length-1] : ch.nodes[0];
+  const sc=scoreLink(anchor,card,dimId);
+  if(end==='tail'){ ch.nodes.push(card); ch.links.push({dimId,score:sc.total,kind:sc.kind}); }
+  else            { ch.nodes.unshift(card); ch.links.unshift({dimId,score:sc.total,kind:sc.kind}); }
+  S.score+=sc.total; S.links++;
+  if(sc.kind==='bridge'){ S.bridges++; }
+  S.bridgeLog.push({a:anchor,b:card,sc});
+  showToast(anchor,card,sc);
+  removeFromHand(S.selected); S.selected=null; closePicker(); enterRefill();
+}
+function removeFromHand(idx){ S.hand.splice(idx,1); }
+function enterRefill(){
+  if(S.deck.length===0 && S.market.length===0){ render(); maybeGameOver(); return; }
+  S.phase='refill'; render();
+}
+function drawFrom(source, mi){
+  if(S.phase!=='refill') return;
+  let card=null;
+  if(source==='pile'){ if(S.deck.length) card=S.deck.pop(); }
+  else { card=S.market[mi]; S.market.splice(mi,1); if(S.deck.length) S.market.push(S.deck.pop()); }
+  if(card) S.hand.push(card);
+  S.phase='select'; render(); maybeGameOver();
+}
+function discardSelected(){
+  if(S.phase!=='select'||S.selected==null) return;
+  removeFromHand(S.selected); S.selected=null; enterRefill();
+}
+function maybeGameOver(){
+  if(S.deck.length===0 && S.market.length===0){
+    // any move still possible?
+    const canPlay = S.hand.some(c=>{const pl=placementsFor(c); return pl.tails.length||pl.heads.length;});
+    if(!canPlay || S.hand.length===0){ /* let player Finish manually; just hint */ }
+  }
+}
+
+/* ============================ RENDER ============================ */
+const el=(id)=>document.getElementById(id);
+function render(){
+  el('s-score').textContent=S.score;
+  el('s-links').textContent=S.links;
+  el('s-bridges').textContent=S.bridges;
+  el('s-pile').textContent=S.deck.length;
+  renderHint(); renderChains(); renderHand(); renderMarket();
+}
+function renderHint(){
+  const h=el('hint');
+  if(S.phase==='refill'){ h.innerHTML='Card played. <b>Refill your hand</b> — take a face-up market card, or gamble on the draw pile.'; return; }
+  if(S.selected==null){ h.innerHTML='Pick a card from your hand. Connect two groups only where they truly agree — score most for <b>bridges between groups that agree on nothing else</b>.'; return; }
+  const card=S.hand[S.selected]; const pl=placementsFor(card);
+  const n=pl.tails.length+pl.heads.length;
+  h.innerHTML = n? `<b>${card.flag} ${card.name}</b> can attach to ${n} glowing spot${n>1?'s':''} — or start a new chain. Same value can't be used twice in a row on one chain.`
+                 : `<b>${card.flag} ${card.name}</b> can't link to any chain end right now — start a new chain, or discard &amp; redraw.`;
+}
+function cardHTML(p,cls='',extra=''){
+  const zc=`var(--${p.zoneColor})`;
+  const sig=signatureLine(p);
+  const pips=[1,2,3,4,5].map(i=>`<i class="${i<=(6-p.breadth)?'on':''}"></i>`).join('');
+  const blab = p.breadth<=2?'niche':p.breadth>=4?'broad':'mid';
+  return `<div class="card ${cls}" style="border-left-color:${zc}" ${extra}>
+     <div class="flag">${p.flag}</div><div class="emoji">${p.emoji}</div>
+     <div class="name">${p.name}</div>
+     <div class="breadth">${pips}<span>${blab}</span></div>
+     <div class="sig">${sig}</div>
+   </div>`;
+}
+function signatureLine(p){ // the group's most distinctive stance vs the world mean
+  const g=ZONES.global.v; let best=null,bd=-1;
+  DIMS.forEach(d=>{ const diff=Math.abs(p.v[d.id]-g[d.id]); if(diff>bd){bd=diff;best=d;} });
+  const val=p.v[best.id]; const agree=val>=55;
+  return `<b>${agree?'▲':'▽'} ${best.short}</b> ${val}/100`;
+}
+function renderChains(){
+  const wrap=el('chains'); wrap.innerHTML='';
+  const card = S.selected!=null? S.hand[S.selected]:null;
+  const pl = card? placementsFor(card):{tails:[],heads:[]};
+  const canPlace = S.phase==='select' && card;
+
+  S.chains.forEach((ch,ci)=>{
+    const row=document.createElement('div'); row.className='chain';
+    // head slot
+    const hp = pl.heads.find(x=>x.ci===ci);
+    if(canPlace && hp){ row.appendChild(slotEl(ci,'head',hp.best)); }
+    ch.nodes.forEach((node,ni)=>{
+      const d=document.createElement('div'); d.innerHTML=cardHTML(node); const cardEl=d.firstElementChild;
+      cardEl.addEventListener('mouseenter',()=>renderSide(node));
+      row.appendChild(cardEl);
+      if(ni<ch.links.length){ row.appendChild(linkEl(ch.links[ni])); }
+    });
+    // tail slot
+    const tp = pl.tails.find(x=>x.ci===ci);
+    if(canPlace && tp){ row.appendChild(slotEl(ci,'tail',tp.best)); }
+    wrap.appendChild(row);
+  });
+
+  // new-chain target
+  const nc=document.createElement('div');
+  nc.className='newchain'+(canPlace?' active':'');
+  nc.innerHTML=`<div class="plus">＋</div><div>${canPlace?'Start new chain here':'New chain'}</div>`;
+  if(canPlace) nc.addEventListener('click',startNewChain);
+  const holder=document.createElement('div'); holder.className='chain'; holder.style.border='none'; holder.style.background='none'; holder.style.minHeight='0'; holder.appendChild(nc);
+  wrap.appendChild(holder);
+
+  if(S.chains.length===0 && !canPlace){
+    wrap.innerHTML='<div style="color:var(--faint);font-size:13px;padding:20px 4px">The board is empty. Select a hand card and press <b>Start new chain</b> to lay your first group.</div>';
+    wrap.appendChild(holder);
+  }
+}
+function slotEl(ci,end,best){
+  const s=document.createElement('div'); s.className='slot';
+  s.innerHTML=`<div class="plus">＋</div><div>connect</div><div class="best">+${best}</div>`;
+  s.addEventListener('click',(e)=>openPicker(ci,end,e.currentTarget));
+  return s;
+}
+function linkEl(link){
+  const d=DIMS[DI[link.dimId]];
+  const w=document.createElement('div'); w.className='link '+(link.kind==='bridge'?'bridge':link.kind==='bond'?'bond':'');
+  w.innerHTML=`<div class="wire"></div><div class="chip"><div class="d">${d.short}</div><div class="p">+${link.score}</div></div><div class="wire"></div>`;
+  return w;
+}
+function renderHand(){
+  const h=el('hand'); h.innerHTML='';
+  S.hand.forEach((p,idx)=>{
+    let cls='in-hand';
+    if(S.selected===idx) cls+=' selected';
+    if(S.phase==='refill') cls+=' dim';
+    const d=document.createElement('div'); d.innerHTML=cardHTML(p,cls); const c=d.firstElementChild;
+    c.addEventListener('click',()=>{ if(S.phase==='select'){selectHand(idx);renderSide(p);} });
+    c.addEventListener('mouseenter',()=>renderSide(p));
+    h.appendChild(c);
+  });
+  if(S.hand.length===0){ h.innerHTML='<div style="color:var(--faint);font-size:12px;padding:20px">Hand empty.</div>'; }
+  // discard control
+  if(S.phase==='select' && S.selected!=null){
+    const b=document.createElement('button'); b.className='btn-ghost'; b.style.alignSelf='center'; b.textContent='Discard & redraw'; b.onclick=discardSelected; h.appendChild(b);
+  }
+}
+function renderMarket(){
+  const m=el('market'); m.innerHTML='';
+  const drawing = S.phase==='refill';
+  const pile=document.createElement('div'); pile.className='pile'+(drawing&&S.deck.length?' draw':'');
+  pile.innerHTML=`<div class="cnt">${S.deck.length}</div>${drawing?'draw blind':'draw pile'}`;
+  if(drawing&&S.deck.length) pile.addEventListener('click',()=>drawFrom('pile'));
+  m.appendChild(pile);
+  S.market.forEach((p,mi)=>{
+    const d=document.createElement('div'); d.innerHTML=cardHTML(p,'mkt'+(drawing?' draw':'')); const c=d.firstElementChild;
+    c.addEventListener('mouseenter',()=>renderSide(p));
+    if(drawing) c.addEventListener('click',()=>drawFrom('market',mi));
+    m.appendChild(c);
+  });
+}
+function renderSide(p){
+  const s=el('side');
+  const zoneChip=`<span class="zone-tag">${p.flag} ${p.zoneName} · ${p.breadth<=2?'niche group':p.breadth>=4?'broad group':'mid group'}</span>`;
+  const bars=DIMS.map(d=>{
+    const val=p.v[d.id]; const sp=spreadOf(p.breadth);
+    const divided = d.pol>=0.7;
+    return `<div class="stancebar">
+       <div class="top"><span class="lab">${d.short}${divided?'<span class="divtag divided">world split</span>':(d.pol<=0.2?'<span class="divtag united">near-universal</span>':'')}</span><span class="val">${val}<small style="color:var(--faint)">±${sp}</small></span></div>
+       <div class="track"><div class="fill" style="width:${val}%"></div></div>
+     </div>`;
+  }).join('');
+  s.innerHTML=`<h3>${p.emoji} ${p.name}</h3>${zoneChip}${bars}
+    <div class="synthnote">Synthetic profile, structured like a World Values Survey group.
+    Bars = share leaning to "agree"; ±spread hints how united the group is (niche groups are more
+    united, so harder to match — and worth more).</div>`;
+}
+
+/* dimension picker popover */
+let pickerEl=null;
+function openPicker(ci,end,anchorNode){
+  closePicker();
+  const card=S.hand[S.selected];
+  const ch=S.chains[ci];
+  const anchor = end==='tail'? ch.nodes[ch.nodes.length-1] : ch.nodes[0];
+  const excl = end==='tail'? endDimTail(ch):endDimHead(ch);
+  const opts = validDims(anchor,card,excl);
+  if(opts.length===1){ placeOnChain(ci,end,opts[0].dimId); return; }
+  const pk=document.createElement('div'); pk.className='picker';
+  pk.innerHTML=`<h4>Connect ${card.flag} ${card.name} · ${anchor.flag} ${anchor.name} on…</h4>`;
+  opts.forEach(o=>{
+    const d=DIMS[DI[o.dimId]];
+    const row=document.createElement('div'); row.className='opt '+(o.kind==='bridge'?'bridge':o.kind==='bond'?'bond':'');
+    const why = o.kind==='bridge'?`rare bridge · distance ${o.dist}`:o.kind==='bond'?`strong bond · tight agreement`:`agree ${anchor.v[o.dimId]}≈${card.v[o.dimId]}`;
+    row.innerHTML=`<div class="dn">${d.short}<small>${why}</small></div><div class="pv">+${o.total}</div>`;
+    row.addEventListener('click',()=>placeOnChain(ci,end,o.dimId));
+    pk.appendChild(row);
+  });
+  document.body.appendChild(pk); pickerEl=pk;
+  const r=anchorNode.getBoundingClientRect();
+  pk.style.left=Math.min(r.left, window.innerWidth-260)+'px';
+  pk.style.top=Math.max(70, r.top-8-pk.offsetHeight)+'px';
+  if(r.top-pk.offsetHeight<70) pk.style.top=(r.bottom+8)+'px';
+}
+function closePicker(){ if(pickerEl){pickerEl.remove();pickerEl=null;} }
+document.addEventListener('click',(e)=>{ if(pickerEl && !pickerEl.contains(e.target) && !e.target.closest('.slot')) closePicker(); });
+
+/* toast (the "bridge reveal" — the pedagogy, delivered as reward) */
+function showToast(a,b,sc){
+  const d=DIMS[DI[sc.dimId]];
+  const tag = sc.kind==='bridge'?'🌉 Bridge':sc.kind==='bond'?'🔗 Strong bond':'· Link';
+  const t=document.createElement('div'); t.className='toast '+sc.kind;
+  let why;
+  if(sc.kind==='bridge') why=`These groups sit far apart (cultural distance ${sc.dist}/100) yet meet here. Finding common ground across that gap is exactly the point.`;
+  else if(sc.kind==='bond') why=`A tight, genuine agreement between two sharply-defined groups — a strong bond.`;
+  else why=`A real point of agreement between these two groups.`;
+  t.innerHTML=`<div class="head"><span class="tag">${tag}</span> <span>${d.label}</span><span class="pts">+${sc.total}</span></div>
+    <div class="who">${a.flag} ${a.name} &nbsp;✕&nbsp; ${b.flag} ${b.name} &nbsp;—&nbsp; both around ${Math.round((a.v[sc.dimId]+b.v[sc.dimId])/2)}/100</div>
+    <div class="why">${why}</div>
+    <div class="math">base ${sc.polBase} × surprise ${sc.surprise} × niche ${sc.niche}${sc.resonance?` + bond ${sc.resonance}`:''} = ${sc.total}</div>`;
+  el('toasts').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';},3400);
+  setTimeout(()=>{t.remove();},3950);
+}
+
+/* ============================ MODALS ============================ */
+function closeModal(){ el('modal-root').innerHTML=''; }
+function helpModal(){
+  el('modal-root').innerHTML=`<div class="modal-bg"><div class="modal">
+    <h2>How to play <b>Value Chain</b></h2>
+    <p class="sub">Build chains of real-world groups, linked only where they genuinely share a value.</p>
+    <p><b>The goal.</b> Score points by connecting groups. You score most for <b>bridges</b> — links
+    between groups that agree on almost nothing <i>else</i> — and for connecting on <b>divisive</b>
+    questions (abortion, religion) rather than things everyone shares (family).</p>
+    <ul>
+      <li><b>Select</b> a card in your hand. Glowing <span style="color:var(--teal)">＋ connect</span>
+      slots show where it can legally attach — only where the two groups' stances actually overlap.</li>
+      <li>Click a slot; if there are several shared values, <b>pick which one to bridge on</b> (that's
+      the real decision — the rarer the value, the bigger the score).</li>
+      <li>You can't use the <b>same value twice in a row</b> on one chain.</li>
+      <li>After each play, <b>refill</b> from the face-up market or gamble on the blind pile.</li>
+      <li>No legal move? <b>Start a new chain</b> or discard &amp; redraw.</li>
+    </ul>
+    <p><b>Three scoring signals</b> (shown in every reveal): how <i>divisive</i> the value is × how
+    <i>far apart</i> the two groups are × how <i>specific</i> they are — plus a bonus for a very tight
+    agreement between two niche groups.</p>
+    <p class="synthnote">Data is <b>synthetic</b> but structured like the World Values Survey — the
+    same two-axis cultural model used to compare ~120 countries. See DESIGN.md.</p>
+    <div class="actions"><button class="btn-gold" onclick="closeModal()">Got it</button></div>
+  </div></div>`;
+}
+function finishModal(){
+  S.phase='over';
+  const bridges=S.bridgeLog.filter(x=>x.sc.kind==='bridge').sort((a,b)=>b.sc.total-a.sc.total).slice(0,3);
+  const longest=S.chains.reduce((m,c)=>Math.max(m,c.nodes.length),0);
+  const reflectHTML = bridges.length? bridges.map(x=>{
+    const d=DIMS[DI[x.sc.dimId]];
+    return `<div class="reflect"><div class="r-tag">Bridge · +${x.sc.total} · distance ${x.sc.dist}/100</div>
+      <div class="r-who">${x.a.flag} ${x.a.name} &nbsp;✕&nbsp; ${x.b.flag} ${x.b.name}</div>
+      <div class="r-why">Common ground: <b>${d.label.toLowerCase()}</b> — two groups who agree on little else.</div></div>`;
+  }).join('') : `<div class="reflect"><div class="r-why">No long-distance bridges this round — try connecting groups from different cultural zones next time; that's where the big scores (and the surprises) live.</div></div>`;
+  el('modal-root').innerHTML=`<div class="modal-bg"><div class="modal">
+    <div class="bigl">Final score</div><div class="big">${S.score}</div>
+    <p class="sub" style="text-align:center">${S.links} links · ${S.bridges} bridges · longest chain ${longest} groups</p>
+    <h2 style="font-size:16px;margin-top:18px">The unlikely alliances you found</h2>
+    ${reflectHTML}
+    <p class="synthnote">Every bridge above is a place where groups who look nothing alike quietly
+    agree. That's the whole game — and the whole point.</p>
+    <div class="actions"><button class="btn-ghost" onclick="closeModal()">Keep looking</button>
+    <button class="btn-gold" onclick="closeModal();newGame()">Play again</button></div>
+  </div></div>`;
+}
+
+/* ============================ WIRE UP ============================ */
+el('btn-help').onclick=helpModal;
+el('btn-finish').onclick=finishModal;
+el('btn-new').onclick=()=>{closeModal();newGame();};
+newGame();
+if(!localStorage.getItem('vc_seen')){ helpModal(); localStorage.setItem('vc_seen','1'); }
+</script>
+</body>
+</html>
