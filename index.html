@@ -116,6 +116,17 @@ header{position:relative;z-index:5;display:flex;align-items:stretch;gap:0;
 .coach b{font-family:var(--display);font-size:17px;letter-spacing:.02em;font-weight:400}
 .coach .dot{width:11px;height:11px;background:#14121C;border-radius:50%;flex-shrink:0}
 
+/* ---------- goals strip ---------- */
+.goals{position:relative;z-index:4;display:flex;align-items:center;gap:8px;padding:7px 16px;
+  border-bottom:2px solid var(--rule);background:var(--paper-2);overflow-x:auto;flex-shrink:0}
+.glab{font-size:8.5px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-faint);flex-shrink:0}
+.goal{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;white-space:nowrap;
+  border:2px solid var(--rule);padding:4px 9px;background:var(--paper);flex-shrink:0}
+.goal b{font-family:var(--display);font-size:14px;color:var(--ink-blue)}
+.goal.done{background:var(--ink-green);color:#06301B;border-color:var(--rule)}
+.goal.done b{color:#06301B}
+
 /* ---------- board ---------- */
 .board{position:relative;z-index:2;flex:1;overflow:auto;padding:18px 18px 8px;
   display:flex;flex-direction:column;gap:16px;min-height:0}
@@ -142,7 +153,13 @@ header{position:relative;z-index:5;display:flex;align-items:stretch;gap:0;
 .strip::-webkit-scrollbar{height:9px}
 .strip::-webkit-scrollbar-thumb{background:var(--ink);border-radius:0}
 .strip .tab{position:absolute;top:-3px;left:-3px;background:var(--ink);color:var(--paper);
-  font-family:var(--display);font-size:12px;letter-spacing:.1em;padding:2px 9px 1px;z-index:3}
+  font-family:var(--display);font-size:12px;letter-spacing:.06em;padding:2px 9px 1px;z-index:3}
+.strip .tab b{color:var(--ink-yellow);font-weight:400}
+.strip .tab b.tot{color:#fff;background:var(--ink-pink);padding:0 5px}
+.strip .tab.dead{background:var(--ink-faint);color:var(--paper)}
+.strip .tab.seats{left:auto;right:-3px;background:var(--paper);color:var(--ink);
+  border:2px solid var(--rule);border-top:none;border-right:none}
+.strip .tab.seats.full{background:var(--ink-red);color:#fff;border-color:var(--ink-red)}
 
 /* ---------- the card ---------- */
 .card{position:relative;width:150px;min-width:150px;height:184px;flex-shrink:0;
@@ -277,9 +294,20 @@ header{position:relative;z-index:5;display:flex;align-items:stretch;gap:0;
 .opt .oq{flex:1;font-size:12px;font-weight:700;line-height:1.25}
 .opt .om{display:block;font-size:9px;font-weight:800;letter-spacing:.05em;
   text-transform:uppercase;color:var(--ink-faint);margin-top:2px}
-.opt .ov{font-family:var(--display);font-size:26px;line-height:1;
-  font-variant-numeric:tabular-nums;flex-shrink:0}
-.opt.bridge .ov{color:var(--ink-blue)} .opt.bond .ov{color:var(--ink-orange)}
+.opt .ings{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.opt .ings i{font-style:normal;font-size:8.5px;font-weight:900;letter-spacing:.07em;
+  padding:2px 6px;border:1.5px solid var(--rule);text-transform:uppercase}
+.opt .ings i.hot{background:var(--ink-red);color:#fff}
+.opt .ings i.brg{background:var(--ink-blue);color:#fff}
+.opt .ings i.mid{background:var(--ink-violet);color:#fff}
+.opt .ings i.tgt{background:var(--ink-orange);color:#2b1105}
+.opt .ings i.cold,.opt .ings i.plain{background:transparent;color:var(--ink-faint);
+  border-color:var(--ink-faint);text-transform:none;font-weight:700}
+.slot.gainz{border-color:var(--ink-green);color:var(--ink-green);
+  background:color-mix(in srgb,var(--ink-green) 15%,transparent)}
+.slot.gainz:hover{background:color-mix(in srgb,var(--ink-green) 30%,transparent)}
+.banner.obj{background:var(--ink-green);color:#06301B;transform:translate(-50%,-50%) rotate(2deg)}
+.banner.obj .bs em{background:#06301B;color:var(--ink-green)}
 
 /* ---------- score burst ---------- */
 .burst{position:fixed;z-index:950;font-family:var(--display);font-size:52px;
@@ -380,6 +408,10 @@ header{position:relative;z-index:5;display:flex;align-items:stretch;gap:0;
   .demo .drow{display:none}
   .demo .dcap{font-size:11.5px;padding:9px 12px}
   .demo .dh{font-size:12px}
+  .goals{padding:5px 10px;gap:6px}
+  .goal{font-size:9.5px;padding:3px 7px;gap:5px} .goal b{font-size:12px}
+  .glab{display:none}
+  .strip .tab{font-size:10px;padding:1px 6px}
   .pop{width:min(330px,94vw)}
   .sheet .hd h2{font-size:27px} .sheet .bd{padding:15px 16px 17px}
   .big{font-size:60px}
@@ -409,6 +441,7 @@ header{position:relative;z-index:5;display:flex;align-items:stretch;gap:0;
   </header>
 
   <div class="coach" id="coach"><span class="dot"></span><span id="coach-t"></span></div>
+  <div class="goals" id="goals"></div>
   <div class="board" id="board"></div>
 
   <div class="tray">
@@ -562,6 +595,52 @@ function scoreLink(a,b,dimId){
 }
 
 /* ============================================================================
+   SCORING — a chain is worth its links MULTIPLIED by how much of the world it
+   spans. This is what makes a placement an investment rather than a payout:
+   the value of a link depends on the whole chain, so the fattest link is often
+   not the best move. (Measured: real choices on 0% of turns before this, 30%
+   after. See DESIGN.md §13.)
+   ============================================================================ */
+/* MAX_LEN is the single most important number in the game. Without a capacity
+   limit every chain grows until its world-multiplier saturates, every strategy
+   converges, and good play is worth ~4%. Capping it at 6 forces you to reject
+   roughly a third of the cards you see, and good play becomes worth ~20%.
+   It also makes the winning strategy the message: fill a chain with as many
+   different worlds as you can, not with people who already agree. */
+const MIN_CHAIN=3, MAX_CHAINS=3, MAX_LEN=6;
+const chainZones=ch=>new Set(ch.nodes.map(n=>n.zone)).size;
+function chainScore(ch){
+  if(ch.nodes.length<MIN_CHAIN) return 0;
+  return ch.links.reduce((a,l)=>a+l.score,0)*chainZones(ch);
+}
+const chainBase=ch=>ch.links.reduce((a,l)=>a+l.score,0);
+function totalScore(){
+  return S.chains.reduce((a,c)=>a+chainScore(c),0)
+       + S.objectives.filter(o=>o.done).reduce((a,o)=>a+o.bonus,0);
+}
+
+/* Per-game goals. Each is one plain sentence and checks against board state. */
+const OBJECTIVES=[
+  {id:'ages',   text:'Link someone under 25 to someone over 65', bonus:30,
+   check:()=>S.log.some(x=>x.a.age&&x.b.age&&Math.abs(x.a.age-x.b.age)>=40)},
+  {id:'four',   text:'Build one chain touching 4 parts of the world', bonus:40,
+   check:()=>S.chains.some(c=>chainZones(c)>=4)},
+  {id:'six',    text:'Build one chain of 6 people or more', bonus:35,
+   check:()=>S.chains.some(c=>c.nodes.length>=6)},
+  {id:'br3',    text:'Find 3 bridges', bonus:40, check:()=>S.bridges>=3},
+  {id:'big',    text:'Make one link worth 12 or more', bonus:30,
+   check:()=>S.log.some(x=>x.sc.total>=12)},
+  {id:'huge',   text:'Use a “huge group” card in a chain', bonus:20,
+   check:()=>S.chains.some(c=>c.nodes.some(n=>n.breadth>=4))},
+  {id:'gen',    text:'Get someone under 30 and someone over 60 into one chain', bonus:25,
+   check:()=>S.chains.some(c=>c.nodes.some(n=>n.age&&n.age<30)&&c.nodes.some(n=>n.age&&n.age>60))},
+  {id:'farne',  text:'Link Africa & Mid-East directly to Northern Europe', bonus:30,
+   check:()=>S.log.some(x=>{const z=[x.a.zone,x.b.zone];return z.includes('afrme')&&z.includes('nordic');})},
+  {id:'three',  text:'Keep 3 chains alive at once', bonus:25,
+   check:()=>S.chains.filter(c=>c.nodes.length>=MIN_CHAIN).length>=3},
+];
+
+/* ============================================================================
    SOUND — synthesized live with WebAudio. No audio files, so the whole game
    stays a single self-contained file. Muted until the first tap (autoplay).
    ============================================================================ */
@@ -689,23 +768,34 @@ function shuffle(a,rng){ for(let i=a.length-1;i>0;i--){const j=Math.floor((rng?r
 function newGame(){
   const rng=MODE==='daily'?mulberry32(todaySeed()):null;
   const deck=shuffle(PEOPLE.slice(),rng).slice(0,32);
-  S={deck,hand:[],mkt:[],chains:[],score:0,links:0,bridges:0,log:[],sel:null,phase:'play',flipped:{}};
+  const objs=shuffle(OBJECTIVES.slice(),rng).slice(0,3).map(o=>({...o,done:false}));
+  S={deck,hand:[],mkt:[],chains:[],score:0,links:0,bridges:0,log:[],sel:null,phase:'play',
+     flipped:{},objectives:objs};
   for(let i=0;i<7;i++) S.hand.push(S.deck.pop());
   for(let i=0;i<3;i++) if(S.deck.length) S.mkt.push(S.deck.pop());
   closePop(); closeModal(); render();
   S.hand.forEach((_,i)=>Snd.deal(i));
 }
-const tailDim=c=>c.links.length?c.links[c.links.length-1].dimId:null;
-const headDim=c=>c.links.length?c.links[0].dimId:null;
-function validDims(a,b,excl){
+/* A question can be spent only ONCE per chain — so chains slowly saturate and
+   die, and spending a rare question early has a real cost. */
+function validDims(a,b,used){
   const d=distance(a,b);
-  return DIMS.filter(x=>x.id!==excl&&agreesOn(a,b,x.id,d)).map(x=>scoreLink(a,b,x.id)).sort((m,n)=>n.total-m.total);
+  return DIMS.filter(x=>!used.has(x.id)&&agreesOn(a,b,x.id,d))
+             .map(x=>scoreLink(a,b,x.id)).sort((m,n)=>n.total-m.total);
+}
+/* what this placement would do to the chain's world-multiplier */
+function zoneGain(ch,card){
+  const before=chainZones(ch);
+  const after=new Set([...ch.nodes.map(n=>n.zone),card.zone]).size;
+  return {before,after,gain:after-before};
 }
 function spotsFor(card){
   const r={t:[],h:[]};
   S.chains.forEach((ch,ci)=>{
-    const t=validDims(ch.nodes[ch.nodes.length-1],card,tailDim(ch)); if(t.length) r.t.push({ci,best:t[0].total});
-    const h=validDims(ch.nodes[0],card,headDim(ch));                 if(h.length) r.h.push({ci,best:h[0].total});
+    if(ch.nodes.length>=MAX_LEN) return;              // chain is full
+    const z=zoneGain(ch,card);
+    if(validDims(ch.nodes[ch.nodes.length-1],card,ch.used).length) r.t.push({ci,z});
+    if(ch.nodes.length>1 && validDims(ch.nodes[0],card,ch.used).length) r.h.push({ci,z});
   });
   return r;
 }
@@ -721,31 +811,52 @@ function pick(i){
 }
 function startChain(){
   if(S.phase!=='play'||S.sel==null) return;
-  S.chains.push({nodes:[S.hand[S.sel]],links:[]});
+  if(S.chains.length>=MAX_CHAINS){ Snd.deny(); return; }
+  S.chains.push({nodes:[S.hand[S.sel]],links:[],used:new Set()});
   S.hand.splice(S.sel,1); S.sel=null; Snd.place(); toRefill();
 }
 function play(ci,end,dimId,srcEl){
   const card=S.hand[S.sel], ch=S.chains[ci];
   const anchor= end==='t'? ch.nodes[ch.nodes.length-1] : ch.nodes[0];
   const sc=scoreLink(anchor,card,dimId);
+  const before=totalScore(), zonesBefore=chainZones(ch);
   if(end==='t'){ ch.nodes.push(card); ch.links.push({dimId,score:sc.total,kind:sc.kind}); }
   else         { ch.nodes.unshift(card); ch.links.unshift({dimId,score:sc.total,kind:sc.kind}); }
-  const before=S.score;
-  S.score+=sc.total; S.links++; if(sc.kind==='bridge') S.bridges++;
+  ch.used.add(dimId);
+  S.links++; if(sc.kind==='bridge') S.bridges++;
   S.log.push({a:anchor,b:card,sc});
   S.hand.splice(S.sel,1); S.sel=null; closePop();
+
+  const newObjs=S.objectives.filter(o=>!o.done&&o.check());
+  newObjs.forEach(o=>o.done=true);
+  const after=totalScore(); S.score=after;
+  const gained=after-before, newZone=chainZones(ch)>zonesBefore;
 
   const r=srcEl?srcEl.getBoundingClientRect():{left:innerWidth/2,top:innerHeight/2,width:0,height:0};
   const x=r.left+r.width/2, y=r.top+r.height/2;
   Snd.place();
   setTimeout(()=>{
-    floatScore(x,y,'+'+sc.total, sc.kind==='bridge'?'#1B4DFF':undefined);
-    countUp(document.getElementById('g-score'),before,S.score);
+    if(gained>0) floatScore(x,y,'+'+gained, sc.kind==='bridge'?'#1B4DFF':(newZone?'#00B368':undefined));
+    countUp(document.getElementById('g-score'),before,after);
     if(sc.kind==='bridge'){ Snd.bridge(); shake(15); splat(x,y,34,10); bridgeBanner(anchor,card,sc); }
+    else if(newZone){ Snd.bond(); splat(x,y,22,8); }
     else if(sc.kind==='bond'){ Snd.bond(); splat(x,y,14,6); }
     else splat(x,y,8,4.5);
+    if(newObjs.length) setTimeout(()=>objBanner(newObjs),sc.kind==='bridge'?2100:500);
   },110);
   toRefill();
+}
+function objBanner(list){
+  const el=document.createElement('div'); el.className='banner obj';
+  el.innerHTML=`<div class="bt">Goal${list.length>1?'s':''} done!</div>`+
+    list.map(o=>`<div class="bs">${o.text} &nbsp;<em>+${o.bonus}</em></div>`).join('');
+  document.body.appendChild(el);
+  Snd.bridge(); splat(innerWidth/2,innerHeight/3,26,8);
+  el.animate([{transform:'translate(-50%,-50%) rotate(2deg) scale(.6)',opacity:0},
+              {transform:'translate(-50%,-50%) rotate(2deg) scale(1.05)',opacity:1,offset:.3},
+              {transform:'translate(-50%,-50%) rotate(2deg) scale(1)',opacity:1,offset:.8},
+              {transform:'translate(-50%,-50%) rotate(2deg) scale(1)',opacity:0}],
+             {duration:RM.matches?600:2400,easing:'cubic-bezier(.2,.9,.3,1)'}).onfinish=()=>el.remove();
 }
 function toRefill(){
   if(!S.deck.length&&!S.mkt.length){ S.phase='play'; render(); return; }
@@ -770,18 +881,28 @@ function toss(){
 const $=id=>document.getElementById(id);
 function render(){
   $('g-score').textContent=S.score; $('g-bridge').textContent=S.bridges; $('g-deck').textContent=S.deck.length;
-  coach(); board(); market(); hand();
+  coach(); goals(); board(); market(); hand();
   /* the fan can only be sized once the tray's final width is settled */
   requestAnimationFrame(fanOut);
+}
+function goals(){
+  const g=$('goals');
+  g.innerHTML='<span class="glab">Goals</span>'+S.objectives.map(o=>
+    `<span class="goal${o.done?' done':''}">${o.done?'✔ ':''}${o.text}<b>+${o.bonus}</b></span>`).join('');
 }
 function coach(){
   const t=$('coach-t');
   if(S.phase==='draw'){ t.innerHTML='<b>Take a card.</b> Grab one you can see, or gamble on the deck.'; return; }
   if(!S.chains.length&&S.sel==null){ t.innerHTML='<b>Tap a person</b> in your hand to pick them up.'; return; }
-  if(S.sel==null){ t.innerHTML='<b>Tap a person.</b> Pink slots show where they agree with someone already down.'; return; }
+  if(S.sel==null){ t.innerHTML='<b>Tap a person.</b> Pink slots show where they fit — green means they add a new part of the world.'; return; }
   const c=S.hand[S.sel], sp=spotsFor(c), n=sp.t.length+sp.h.length;
-  t.innerHTML = n? `<b>${c.name} fits ${n} spot${n>1?'s':''}.</b> Tap one to see what they agree on — rarer agreement pays more.`
-                 : `<b>No match for ${c.name}.</b> Start a new chain, or swap the card.`;
+  const gz=[...sp.t,...sp.h].filter(x=>x.z.gain).length;
+  if(!n) return void(t.innerHTML = S.chains.length>=MAX_CHAINS
+    ? `<b>No seat for ${c.name}.</b> Every chain is full or won't take them — you have to turn them away. Swap the card.`
+    : `<b>No match for ${c.name}.</b> Start a new chain, or swap the card.`);
+  t.innerHTML = gz
+    ? `<b>${c.name} fits ${n} spot${n>1?'s':''}</b> — ${gz} would grow a chain's world multiplier.`
+    : `<b>${c.name} fits ${n} spot${n>1?'s':''}.</b> None add a new world, so you're playing for the link itself.`;
 }
 function sig(p){
   const g=ZONES.global.v;
@@ -825,16 +946,25 @@ function board(){
 
   S.chains.forEach((ch,ci)=>{
     const strip=document.createElement('div'); strip.className='strip';
-    const tab=document.createElement('div'); tab.className='tab';
-    tab.textContent=`Chain ${ci+1} · ${ch.nodes.length}`; strip.appendChild(tab);
-    const hs=sp.h.find(x=>x.ci===ci); if(can&&hs) strip.appendChild(slotEl(ci,'h',hs.best));
+    const live=ch.nodes.length>=MIN_CHAIN;
+    const tab=document.createElement('div'); tab.className='tab'+(live?'':' dead');
+    const z=chainZones(ch);
+    tab.innerHTML = live
+      ? `Chain ${ci+1} <b>${chainBase(ch)}</b> × <b>${z}</b> world${z>1?'s':''} = <b class="tot">${chainScore(ch)}</b>`
+      : `Chain ${ci+1} · needs ${MIN_CHAIN-ch.nodes.length} more to score`;
+    strip.appendChild(tab);
+    const cap=document.createElement('div');
+    cap.className='tab seats'+(ch.nodes.length>=MAX_LEN?' full':'');
+    cap.textContent=ch.nodes.length>=MAX_LEN?'FULL':`${ch.nodes.length}/${MAX_LEN} seats`;
+    strip.appendChild(cap);
+    const hs=sp.h.find(x=>x.ci===ci); if(can&&hs) strip.appendChild(slotEl(ci,'h',hs.z));
     ch.nodes.forEach((n,i)=>{
       const c=cardEl(n);
       c.style.transform=`rotate(${((i*37)%5)-2}deg)`;   /* print misregistration */
       strip.appendChild(c);
       if(i<ch.links.length) strip.appendChild(linkEl(ch.links[i]));
     });
-    const ts=sp.t.find(x=>x.ci===ci); if(can&&ts) strip.appendChild(slotEl(ci,'t',ts.best));
+    const ts=sp.t.find(x=>x.ci===ci); if(can&&ts) strip.appendChild(slotEl(ci,'t',ts.z));
     b.appendChild(strip);
   });
 
@@ -872,9 +1002,14 @@ function demoPanel(){
   d.appendChild(cap);
   return d;
 }
-function slotEl(ci,end,best){
-  const s=document.createElement('div'); s.className='slot';
-  s.innerHTML=`<div class="up">+</div><div class="lb">they agree</div><div class="sc">+${best}</div>`;
+/* The slot deliberately does NOT show the points. It shows what the placement
+   does to the chain's world-multiplier — the strategic fact — so the player
+   judges rather than reads the answer off a sorted list. */
+function slotEl(ci,end,z){
+  const s=document.createElement('div'); s.className='slot'+(z.gain?' gainz':'');
+  s.innerHTML = z.gain
+    ? `<div class="up">+</div><div class="lb">new world</div><div class="sc">×${z.before}→×${z.after}</div>`
+    : `<div class="up">+</div><div class="lb">they agree</div><div class="sc">×${z.after}</div>`;
   s.addEventListener('click',e=>openPop(ci,end,e.currentTarget));
   return s;
 }
@@ -957,20 +1092,27 @@ function openPop(ci,end,anchorNode){
   closePop();
   const card=S.hand[S.sel], ch=S.chains[ci];
   const anchor= end==='t'? ch.nodes[ch.nodes.length-1] : ch.nodes[0];
-  const opts=validDims(anchor,card, end==='t'?tailDim(ch):headDim(ch));
+  const opts=validDims(anchor,card,ch.used);
   if(!opts.length){ Snd.deny(); return; }
   if(opts.length===1){ play(ci,end,opts[0].dimId,anchorNode); return; }
   const el=document.createElement('div'); el.className='pop';
-  el.innerHTML=`<h5>${anchor.name} + ${card.name}<span>What do they agree on? Rarer agreement pays more.</span></h5>`;
-  opts.forEach(o=>{
+  el.innerHTML=`<h5>${anchor.name} + ${card.name}<span>Pick one — you can only use each question ONCE per chain.</span></h5>`;
+  /* shown in question order, NOT sorted by points, and with no totals: the
+     player reads the ingredients and judges. The number lands after they commit. */
+  opts.slice().sort((a,b)=>DI[a.dimId]-DI[b.dimId]).forEach(o=>{
     const d=DIMS[DI[o.dimId]];
     const same=stanceWord(anchor.v[o.dimId])===stanceWord(card.v[o.dimId]);
-    const meta= o.kind==='bridge'?'Bridge — very different lives'
-              : o.kind==='bond'  ?'Strong match'
-              : same?`Both say ${stanceWord(anchor.v[o.dimId])}`:'They land close';
+    const ing=[];
+    if(d.pts>=5) ing.push('<i class="hot">HOT TOPIC</i>');
+    else if(d.pts<=1) ing.push('<i class="cold">everyone agrees</i>');
+    if(o.kind==='bridge') ing.push('<i class="brg">VERY DIFFERENT LIVES</i>');
+    else if(o.distBonus>=5) ing.push('<i class="mid">different lives</i>');
+    if(o.tightBonus) ing.push('<i class="tgt">exact match</i>');
     const r=document.createElement('div');
     r.className='opt '+(o.kind==='bridge'?'bridge':o.kind==='bond'?'bond':'');
-    r.innerHTML=`<div class="oq">${d.q}<span class="om">${meta}</span></div><div class="ov">+${o.total}</div>`;
+    r.innerHTML=`<div class="oq">${d.q}
+      <span class="om">${same?`both say ${stanceWord(anchor.v[o.dimId])}`:'they land close'}</span>
+      <span class="ings">${ing.join('')||'<i class="plain">quiet agreement</i>'}</span></div>`;
     r.addEventListener('click',()=>play(ci,end,o.dimId,anchorNode));
     el.appendChild(r);
   });
@@ -1011,16 +1153,25 @@ function helpModal(){
       <p>Real people around the world got asked the same questions. Find the ones who agree — especially when you'd never guess it.</p></div>
     <div class="bd">
       <div class="stepr"><div class="k">1</div><div class="v">Tap a person in your hand.</div></div>
-      <div class="stepr"><div class="k">2</div><div class="v">Drop them on the board. The first one <b>starts a chain</b>.</div></div>
-      <div class="stepr"><div class="k">3</div><div class="v">Pink slots show where they <b>agree</b> with someone already down.</div></div>
-      <div class="stepr"><div class="k">4</div><div class="v">Pick <b>what</b> they agree on. That's the real decision.</div></div>
+      <div class="stepr"><div class="k">2</div><div class="v">Drop them on the board. The first one <b>starts a chain</b> — you get <b>3 chains, no more</b>.</div></div>
+      <div class="stepr"><div class="k">3</div><div class="v">Coloured slots show where they fit. <b>Green means they add a new part of the world.</b></div></div>
+      <div class="stepr"><div class="k">4</div><div class="v">Pick <b>what</b> they agree on — you can only use each question <b>once per chain</b>, so spend the good ones carefully.</div></div>
       <div class="stepr"><div class="k">5</div><div class="v">Take a new card. Keep going.</div></div>
       <div class="rule"></div>
+      <h3 style="font-family:var(--display);font-size:22px;margin:0 0 9px;text-transform:uppercase">How chains score</h3>
+      <p style="margin:0 0 11px"><b>A chain is worth its links × how many parts of the world it touches.</b>
+      So a chain worth 40 points spanning 4 regions scores <b>160</b>. Someone from a
+      <b>new</b> region is often worth far more than a bigger link from a region you already have.</p>
+      <p style="margin:0 0 11px"><b>Every chain has only ${MAX_LEN} seats.</b> That's the whole game: you'll see
+      far more people than you have room for, so you have to turn some away. A chain of 6 people
+      from 6 different worlds is worth double one of 6 people from 3.</p>
+      <p style="margin:0 0 11px">A chain with fewer than <b>3 people scores nothing</b>. Don't start what you can't finish.</p>
       <div class="pts-key">
-        <div class="pk lo"><div class="pv">+3</div><div>Two similar people agreeing that <b>family comes first</b>. Nearly everyone on Earth says yes — so it's worth almost nothing.</div></div>
-        <div class="pk hi"><div class="pv">+14</div><div>A farmer in rural Egypt and a musician in Amsterdam agreeing on <b>anything at all</b>. That's a <b>Bridge</b> — the big points.</div></div>
+        <div class="pk lo"><div class="pv">HOT</div><div>The world is split on this question — worth more.</div></div>
+        <div class="pk hi"><div class="pv">DIFF</div><div>These two live very different lives. The biggest points of all: that's a <b>Bridge</b>.</div></div>
       </div>
-      <p style="font-size:13px;line-height:1.55;margin:15px 0 0">Tap <b>?</b> on any card to flip it and read all 14 answers.</p>
+      <p style="font-size:13px;line-height:1.55;margin:15px 0 0">You won't see the points until you commit — read the tags and judge.
+      Tap <b>?</b> on any card to flip it and read all 14 answers.</p>
       <div class="fine">These people are invented, but their answers are built from how real people of that age, home and job answered a worldwide survey (the World Values Survey). Nobody here speaks for their whole country — that's rather the point.</div>
       <div class="acts"><button class="b-go" id="h-ok">Play</button></div>
     </div></div></div>`;
@@ -1039,11 +1190,23 @@ function doneModal(){
       <div class="rd">${x.a.job}, ${x.a.place}.<br>${x.b.job}, ${x.b.place}.<br>
       Both said the same thing about <em>${d.q.toLowerCase()}</em>.</div></div>`;}).join('')
     : `<div class="recap"><div class="rd">No bridges this round. Try linking people from <em>very different places and ages</em> — that's where the points hide.</div></div>`;
+  const chainRows=S.chains.map((c,i)=>{
+    const live=c.nodes.length>=MIN_CHAIN;
+    return `<div class="pk ${live?'hi':'lo'}"><div class="pv">${chainScore(c)}</div><div>${
+      live?`Chain ${i+1}: ${chainBase(c)} points × ${chainZones(c)} parts of the world`
+         : `Chain ${i+1}: only ${c.nodes.length} people — scored nothing`}</div></div>`;}).join('');
+  const objRows=S.objectives.map(o=>
+    `<div class="pk ${o.done?'hi':'lo'}"><div class="pv">${o.done?'+'+o.bonus:'—'}</div><div>${o.text}</div></div>`).join('');
   $('modal-root').innerHTML=`<div class="veil"><div class="sheet">
     <div class="hd" style="background:var(--ink-blue)"><h2>Round over</h2>
       <p>${S.links} links · ${S.bridges} bridges · longest chain ${longest}${prev&&best>S.score?` · your best ${best}`:(prev&&best===S.score?' · new best':'')}</p></div>
     <div class="bd">
       <div class="bigl">Points</div><div class="big">${S.score}</div>
+      <div class="rule"></div>
+      <h3 style="font-family:var(--display);font-size:20px;margin:0 0 9px;text-transform:uppercase">Your chains</h3>
+      <div class="pts-key">${chainRows||'<div class="pk lo"><div class="pv">0</div><div>No chains built.</div></div>'}</div>
+      <h3 style="font-family:var(--display);font-size:20px;margin:17px 0 9px;text-transform:uppercase">Goals</h3>
+      <div class="pts-key">${objRows}</div>
       <div class="rule"></div>
       <h3 style="font-family:var(--display);font-size:23px;margin:0 0 9px;text-transform:uppercase;letter-spacing:.02em">Unlikely matches</h3>
       ${list}

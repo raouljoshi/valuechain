@@ -462,7 +462,88 @@ Three bugs found by measuring rather than eyeballing, worth recording because th
 
 ---
 
-## 12. What the prototype demonstrates
+## 12. The game had no decisions — diagnosis and fix
+
+Playtest feedback after the visual rebuild: *"it seems very deterministic, I can basically always
+place a card and I simply choose the link with the highest number — no thought, effort or reflection
+goes into planning."*
+
+That was correct, and measurably so. Three bots were run over seeded games:
+
+| Policy | Score | Bridges | Turns with a legal move |
+|---|---|---|---|
+| Greedy (always take the biggest number) | 273 | 3.8 | **96%** |
+| Random legal move | 169 | 0.6 | 96% |
+| Deliberately worst legal move | 93 | 0.0 | 96% |
+
+96% of turns had a legal move, with **89 legal options per turn**. Worse, a **2-ply lookahead bot beat
+greedy by 0.0%** — planning was worth exactly nothing. The game was a solved greedy problem dressed
+up as a card game.
+
+The relevant standard: *in an interesting choice, no single option is clearly better than the others*
+([Sid Meier, GDC](https://www.gamedeveloper.com/design/gdc-2012-sid-meier-on-how-to-see-games-as-sets-of-interesting-decisions),
+[Designing Interesting Decisions](https://www.gamedeveloper.com/design/designing-interesting-decisions-in-games-and-when-not-to-)).
+One option was always clearly better, and the UI printed it in bold at the top of a sorted list.
+
+### 12.1 Root cause
+
+1. **Scoring was stateless.** A link's value was a pure function of `(personA, personB, question)`.
+   Nothing about the board affected it, so there was nothing to plan around.
+2. **Nothing was scarce.** The hand refilled to 7 every turn, chains grew at both ends without limit,
+   and "start a new chain" was a free escape hatch. No resource was ever contested.
+3. **The UI gave the answer away.** Options were sorted by points with the total displayed.
+
+### 12.2 What did *not* work (tested and rejected)
+
+- **Tightening the connection rule.** Depth stayed at 11% while bridge reachability collapsed from
+  100% → 10%. Scarcity of *connections* costs the mission and buys nothing.
+- **Chain-length multipliers alone.** 0% — greedy simply self-optimises into them.
+- **A turn budget.** 8% depth, and it makes the game feel like homework for a 10-year-old.
+- **Shrinking the deck.** No effect (3–6% at every size tested).
+
+### 12.3 The fix
+
+**A chain scores `sum of its links × the number of world regions it spans`.** Value now depends on the
+whole chain, so the fattest link is often not the best move. Thematically exact: a coalition that
+spans more of the world is worth more.
+
+**Each question can be spent only once per chain.** Chains saturate; spending a rare question early
+has a real cost.
+
+**Chains have only 6 seats, there are only 3 chains, and a chain under 3 people scores nothing.**
+This is the load-bearing change. Without a capacity limit every chain grew to ~15 people, its
+multiplier saturated, every strategy converged, and good play was worth 4%. With 18 total seats
+against ~30 cards seen, **you must turn away roughly 8 people per game** — which is the opportunity
+cost the game never had.
+
+**Three per-game goals** give directed planning beyond the immediate board.
+
+**The picker no longer sorts by points or shows totals.** It lists questions in fixed order with
+judgment tags (`HOT TOPIC`, `VERY DIFFERENT LIVES`, `EXACT MATCH`, `everyone agrees`). The slot shows
+what the placement does to the chain's multiplier (`NEW WORLD ×1→×2`, in green) rather than a score.
+This changes no maths but converts the core interaction from *reading* to *judging*.
+
+### 12.4 Result, measured in the live game code
+
+| | Before | After |
+|---|---|---|
+| Turns where the biggest number is **not** the best move | **0%** | **50%** |
+| Good play vs. naive play | 0% | **+20%** |
+| Cards you must turn away | 0 | **8 per game** |
+| Game-to-game score spread | 14% | 20% |
+
+**The winning strategy is now the message.** The way to score is to fill each limited chain with
+people from as many different worlds as possible — a broad coalition beats an echo chamber, by a
+factor of two. Nobody has to be told that; the scoring teaches it.
+
+One honest caveat: a simple heuristic ("prefer the slot that adds a new region") performs slightly
+*better* than a 1-ply optimiser, so there is a strong guiding principle rather than deep tactical
+calculation. For a 10+ audience that is arguably correct — a learnable strategy beats an inscrutable
+one — but it means this is a game of good judgement, not a puzzle with a hidden optimum.
+
+---
+
+## 13. What the prototype demonstrates
 
 `index.html` is a self-contained, playable prototype (open it in any browser — no build, no server,
 no external requests). It implements the 14 WVS-grounded questions, **40 named people across 8

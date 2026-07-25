@@ -10,6 +10,11 @@ the message.
 
 Built for **ages 10 and up**: whole-number scores, answers in plain words, a five-step tutorial.
 
+**A chain is worth its links × how many parts of the world it spans, and every chain has only 6
+seats.** You will see far more people than you have room for, so the game is really about who you
+turn away. The way to win is to fill each chain with people from as many different worlds as you can
+— a broad coalition scores double a narrow one. The strategy *is* the message.
+
 > Most countries appear two or three times in the deck, with genuinely different values — so the deck
 > itself teaches that a country is not one thing. See [DESIGN.md §10.1](DESIGN.md).
 
