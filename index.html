@@ -1,0 +1,1239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>VALUE CHAIN</title>
+<style>
+/* ============================================================================
+   VALUE CHAIN — visual identity: RISOGRAPH ZINE
+   Flat spot inks, overprint (multiply), halftone texture, deliberate
+   misregistration, condensed poster display type. No webfonts (CSP-safe),
+   no emoji (they clash with flat inks and flag emoji break on Windows).
+   ============================================================================ */
+:root{
+  /* riso spot inks */
+  --ink-pink:#FF3D9A;  --ink-blue:#1B4DFF;  --ink-yellow:#FFC800;
+  --ink-green:#00B368;  --ink-orange:#FF6B2C; --ink-violet:#8B5CF6;
+  --ink-teal:#00C2CC;  --ink-red:#F03D3D;
+
+  /* ground + structure (light = newsprint stock) */
+  --paper:#EFE9D9;
+  --paper-2:#E4DCC7;
+  --ink:#14121C;
+  --ink-soft:#4A4553;
+  --ink-faint:#8A8393;
+  --rule:#14121C;
+  --card-face:#FBF7EC;
+  --shadow:rgba(20,18,28,.30);
+  --halftone:rgba(20,18,28,.16);
+
+  --accent:var(--ink-pink);
+  --r:3px;                       /* print has crisp corners, not rounded-lg */
+  --display:Impact,"Haettenschweiler","Franklin Gothic Bold","Arial Narrow",
+            "Helvetica Neue Condensed",sans-serif;
+  --body:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#12101A; --paper-2:#1B1826; --ink:#F6F1E4; --ink-soft:#B5AEC0;
+    --ink-faint:#7A7389; --rule:#F6F1E4; --card-face:#221E30;
+    --shadow:rgba(0,0,0,.6); --halftone:rgba(246,241,228,.10);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#12101A; --paper-2:#1B1826; --ink:#F6F1E4; --ink-soft:#B5AEC0;
+  --ink-faint:#7A7389; --rule:#F6F1E4; --card-face:#221E30;
+  --shadow:rgba(0,0,0,.6); --halftone:rgba(246,241,228,.10);
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --paper:#EFE9D9; --paper-2:#E4DCC7; --ink:#14121C; --ink-soft:#4A4553;
+  --ink-faint:#8A8393; --rule:#14121C; --card-face:#FBF7EC;
+  --shadow:rgba(20,18,28,.30); --halftone:rgba(20,18,28,.16);
+  color-scheme:light;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-size:15px;overflow:hidden;overscroll-behavior:none;
+  touch-action:manipulation;
+}
+/* halftone dot screen + paper grain, the riso signature */
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(var(--halftone) 1px,transparent 1.1px);
+  background-size:4px 4px;opacity:.55;
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+#shake{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column}
+#fx{position:fixed;inset:0;z-index:900;pointer-events:none}
+
+button{font-family:var(--body);font-weight:800;cursor:pointer;border:2px solid var(--rule);
+  background:transparent;color:var(--ink);border-radius:var(--r);padding:9px 14px;
+  font-size:12px;letter-spacing:.06em;text-transform:uppercase;min-height:42px;
+  box-shadow:2px 2px 0 var(--rule);transition:transform .07s,box-shadow .07s,background .12s}
+button:hover{background:var(--ink);color:var(--paper)}
+button:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--rule)}
+button:focus-visible{outline:3px solid var(--ink-pink);outline-offset:3px}
+.b-go{background:var(--ink-pink);color:#fff;border-color:var(--rule)}
+.b-go:hover{background:var(--ink);color:var(--paper)}
+
+/* ---------- masthead ---------- */
+header{position:relative;z-index:5;display:flex;align-items:stretch;gap:0;
+  border-bottom:3px solid var(--rule);background:var(--paper);flex-shrink:0}
+.brand{padding:7px 14px 5px;border-right:3px solid var(--rule);display:flex;
+  flex-direction:column;justify-content:center;background:var(--ink-pink);color:#fff}
+.brand .t{font-family:var(--display);font-size:27px;line-height:.86;letter-spacing:.02em;
+  text-transform:uppercase}
+.brand .s{font-size:8.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;
+  margin-top:3px;opacity:.9}
+.gauges{display:flex;flex:1;min-width:0}
+.gauge{padding:6px 16px;border-right:2px solid var(--rule);display:flex;
+  flex-direction:column;justify-content:center;flex:0 0 auto}
+.gauge .n{font-family:var(--display);font-size:30px;line-height:.9;
+  font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.gauge .l{font-size:8.5px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink-faint);margin-top:2px;white-space:nowrap}
+.gauge.pts .n{color:var(--ink-pink)}
+.gauge.brg .n{color:var(--ink-blue)}
+.tools{display:flex;align-items:center;gap:7px;padding:0 12px;margin-left:auto}
+.tools button{padding:7px 11px;min-height:36px;box-shadow:1.5px 1.5px 0 var(--rule)}
+.icon-b{width:36px;padding:0!important;display:grid;place-items:center;font-size:14px}
+
+/* ---------- coach strip ---------- */
+.coach{position:relative;z-index:4;display:flex;align-items:center;gap:11px;
+  padding:9px 18px;border-bottom:2px solid var(--rule);background:var(--ink-yellow);
+  color:#14121C;font-size:14px;font-weight:600;line-height:1.35;flex-shrink:0}
+.coach b{font-family:var(--display);font-size:17px;letter-spacing:.02em;font-weight:400}
+.coach .dot{width:11px;height:11px;background:#14121C;border-radius:50%;flex-shrink:0}
+
+/* ---------- goals strip ---------- */
+.goals{position:relative;z-index:4;display:flex;align-items:center;gap:8px;padding:7px 16px;
+  border-bottom:2px solid var(--rule);background:var(--paper-2);overflow-x:auto;flex-shrink:0}
+.glab{font-size:8.5px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-faint);flex-shrink:0}
+.goal{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;white-space:nowrap;
+  border:2px solid var(--rule);padding:4px 9px;background:var(--paper);flex-shrink:0}
+.goal b{font-family:var(--display);font-size:14px;color:var(--ink-blue)}
+.goal.done{background:var(--ink-green);color:#06301B;border-color:var(--rule)}
+.goal.done b{color:#06301B}
+
+/* ---------- board ---------- */
+.board{position:relative;z-index:2;flex:1;overflow:auto;padding:18px 18px 8px;
+  display:flex;flex-direction:column;gap:16px;min-height:0}
+.board.empty{justify-content:center;align-items:flex-start}
+/* empty-state worked example: teaches the whole idea in one panel */
+.demo{display:flex;flex-direction:column;gap:0;max-width:760px;align-self:center;
+  border:3px solid var(--rule);background:var(--paper-2);box-shadow:6px 6px 0 var(--shadow)}
+.demo .dh{background:var(--ink-blue);color:#fff;font-family:var(--display);font-size:15px;
+  letter-spacing:.08em;text-transform:uppercase;padding:5px 13px;
+  border-bottom:3px solid var(--rule)}
+.demo .drow{display:flex;align-items:center;justify-content:center;padding:16px 14px 6px;
+  overflow-x:auto}
+.demo .dcap{padding:4px 18px 15px;font-size:13px;line-height:1.55;color:var(--ink-soft)}
+.demo .dcap b{color:var(--ink)}
+.demo .dcap em{font-style:normal;background:var(--ink-yellow);color:#14121C;padding:0 4px;
+  font-weight:800}
+.demo .card{cursor:default}
+/* market cards sit on the table, so they read a touch smaller than the ones in your hand */
+.mkt .card{width:130px;min-width:130px;height:172px}
+.mkt .nm{font-size:20px}
+.strip{position:relative;border:3px solid var(--rule);background:var(--paper-2);
+  padding:14px 13px;display:flex;align-items:center;gap:0;overflow-x:auto;overflow-y:hidden;
+  min-height:212px;box-shadow:5px 5px 0 var(--shadow)}
+.strip::-webkit-scrollbar{height:9px}
+.strip::-webkit-scrollbar-thumb{background:var(--ink);border-radius:0}
+.strip .tab{position:absolute;top:-3px;left:-3px;background:var(--ink);color:var(--paper);
+  font-family:var(--display);font-size:12px;letter-spacing:.06em;padding:2px 9px 1px;z-index:3}
+.strip .tab b{color:var(--ink-yellow);font-weight:400}
+.strip .tab b.tot{color:#fff;background:var(--ink-pink);padding:0 5px}
+.strip .tab.dead{background:var(--ink-faint);color:var(--paper)}
+.strip .tab.seats{left:auto;right:-3px;background:var(--paper);color:var(--ink);
+  border:2px solid var(--rule);border-top:none;border-right:none}
+.strip .tab.seats.full{background:var(--ink-red);color:#fff;border-color:var(--ink-red)}
+
+/* ---------- the card ---------- */
+.card{position:relative;width:150px;min-width:150px;height:184px;flex-shrink:0;
+  perspective:900px;background:none;border:none}
+.face{position:absolute;inset:0;background:var(--card-face);border:2.5px solid var(--rule);
+  box-shadow:3px 3px 0 var(--shadow);backface-visibility:hidden;
+  transform-style:preserve-3d;display:flex;flex-direction:column;padding:9px 10px;
+  transition:box-shadow .15s}
+.card .back{transform:rotateY(180deg);padding:7px 8px;overflow:hidden}
+.card.flip .front{transform:rotateY(180deg)}
+.card.flip .back{transform:rotateY(360deg)}
+.front,.back{transition:transform .5s cubic-bezier(.4,.1,.25,1)}
+/* overprinted ink block, deliberately misregistered */
+.face::before{content:"";position:absolute;left:-4px;top:-4px;width:46px;height:46px;
+  background:var(--c);mix-blend-mode:multiply;opacity:.9;z-index:0}
+/* multiply goes muddy on a dark ground; screen keeps the ink bright */
+@media (prefers-color-scheme:dark){ .face::before{mix-blend-mode:screen;opacity:.5} }
+:root[data-theme="dark"] .face::before{mix-blend-mode:screen;opacity:.5}
+:root[data-theme="light"] .face::before{mix-blend-mode:multiply;opacity:.9}
+.blob{position:relative;z-index:1;width:36px;height:36px;display:grid;place-items:center;
+  font-family:var(--display);font-size:22px;color:#fff;line-height:1;
+  text-shadow:1px 1px 0 rgba(0,0,0,.25)}
+.nm{font-family:var(--display);font-size:23px;line-height:.92;letter-spacing:.01em;
+  margin-top:7px;text-transform:uppercase;position:relative;z-index:1;
+  overflow-wrap:anywhere}
+.nm i{font-style:normal;font-family:var(--mono);font-size:12px;font-weight:700;
+  color:var(--ink-soft);letter-spacing:0}
+.pl{font-size:11px;line-height:1.25;color:var(--ink-soft);margin-top:4px;font-weight:600}
+.jb{font-size:11px;line-height:1.25;color:var(--ink-faint);margin-top:2px;flex:1}
+.chip{align-self:flex-start;font-size:8px;font-weight:900;letter-spacing:.1em;
+  text-transform:uppercase;padding:2.5px 6px;border:1.5px solid var(--rule);
+  background:var(--paper);margin-top:4px}
+.chip.wide{background:var(--ink-blue);color:#fff;border-color:var(--ink-blue)}
+.sg{border-top:2px solid var(--rule);margin-top:6px;padding-top:5px;font-size:10px;
+  line-height:1.3;font-weight:600}
+.sg b{font-family:var(--display);font-size:13px;letter-spacing:.03em;font-weight:400}
+.sg b.y{color:var(--ink-green)} .sg b.n{color:var(--ink-red)} .sg b.m{color:var(--ink-orange)}
+.flipb{position:absolute;bottom:5px;right:5px;z-index:4;width:21px;height:21px;
+  border:1.5px solid var(--rule);background:var(--paper);font-family:var(--display);
+  font-size:12px;display:grid;place-items:center;cursor:pointer;padding:0;
+  min-height:0;box-shadow:none;color:var(--ink)}
+.flipb:hover{background:var(--ink);color:var(--paper)}
+/* card back: the 14 answers */
+.qrow{display:flex;justify-content:space-between;gap:5px;font-size:8.5px;line-height:1.45;
+  border-bottom:1px dotted var(--ink-faint);padding:.5px 0}
+.qrow span:first-child{color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap}
+.qrow b{font-weight:900;font-size:8px;letter-spacing:.03em;flex-shrink:0}
+.qrow b.y{color:var(--ink-green)} .qrow b.n{color:var(--ink-red)} .qrow b.m{color:var(--ink-orange)}
+.back h6{font-family:var(--display);font-size:13px;margin:0 0 3px;letter-spacing:.04em;
+  text-transform:uppercase}
+
+/* hand cards: fanned, tactile */
+.hand .card{cursor:grab;transition:transform .16s cubic-bezier(.34,1.4,.5,1)}
+.hand .card:hover{z-index:20}
+.hand .card.sel{z-index:25}
+.hand .card.sel .face{box-shadow:0 0 0 3px var(--ink-pink),5px 6px 0 var(--shadow)}
+
+/* ---------- link between cards ---------- */
+.lnk{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:92px;padding:0 4px;position:relative;flex-shrink:0}
+.lnk .bar{width:100%;height:5px;background:repeating-linear-gradient(90deg,
+  var(--rule) 0 9px,transparent 9px 15px)}
+.lnk .tagl{margin:6px 0;border:2.5px solid var(--rule);background:var(--paper);
+  padding:4px 8px;text-align:center;box-shadow:2px 2px 0 var(--shadow);max-width:104px}
+.lnk .tagl .q{font-size:8px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--ink-soft);line-height:1.15}
+.lnk .tagl .v{font-family:var(--display);font-size:22px;line-height:.95;
+  font-variant-numeric:tabular-nums}
+.lnk.bridge .tagl{background:var(--ink-blue);border-color:var(--rule)}
+.lnk.bridge .tagl .q{color:rgba(255,255,255,.85)}
+.lnk.bridge .tagl .v{color:#fff}
+.lnk.bond .tagl{background:var(--ink-yellow)}
+.lnk.bond .tagl .v{color:#14121C}
+
+/* ---------- drop slot ---------- */
+.slot{width:110px;min-width:110px;height:184px;flex-shrink:0;border:3px dashed var(--ink-pink);
+  background:color-mix(in srgb,var(--ink-pink) 12%,transparent);display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;
+  color:var(--ink-pink);animation:pulse 1.1s ease-in-out infinite}
+.slot:hover{background:color-mix(in srgb,var(--ink-pink) 26%,transparent)}
+.slot .up{font-family:var(--display);font-size:30px;line-height:1}
+.slot .lb{font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+  text-align:center;padding:0 4px}
+.slot .sc{font-family:var(--display);font-size:21px;line-height:1}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+.newc{width:150px;min-width:150px;height:184px;flex-shrink:0;border:3px dashed var(--ink-faint);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  color:var(--ink-faint);cursor:pointer;text-align:center;padding:10px;font-size:10px;
+  font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.newc.on{border-color:var(--ink-pink);color:var(--ink-pink);
+  background:color-mix(in srgb,var(--ink-pink) 10%,transparent)}
+.newc .up{font-family:var(--display);font-size:32px;line-height:1}
+
+/* ---------- tray ---------- */
+.tray{position:relative;z-index:6;border-top:3px solid var(--rule);background:var(--paper);
+  display:flex;align-items:flex-start;gap:0;flex-shrink:0}
+.tray .zone{padding:11px 16px 14px;min-width:0}
+.tray .zone.h{flex:1;overflow:visible}
+.tray .zone.m{border-left:2px solid var(--rule);background:var(--paper-2)}
+.zlab{font-size:8.5px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-faint);margin-bottom:7px;display:flex;align-items:center;gap:9px;height:26px}
+.zlab button{min-height:24px;padding:3px 9px;font-size:9px;box-shadow:1.5px 1.5px 0 var(--rule)}
+/* rotation inflates each card's box, so the row needs headroom beyond card height */
+.hand{display:flex;align-items:flex-end;min-height:212px;padding-left:6px}
+.mkt{display:flex;gap:8px;align-items:flex-end;min-height:212px}
+.pile{width:96px;min-width:96px;height:184px;border:3px solid var(--rule);
+  background:repeating-linear-gradient(45deg,var(--ink-blue) 0 7px,var(--paper-2) 7px 14px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  color:var(--ink);box-shadow:3px 3px 0 var(--shadow)}
+.pile .n{font-family:var(--display);font-size:36px;line-height:.9;background:var(--paper);
+  padding:0 7px;border:2px solid var(--rule)}
+.pile .l{font-size:8.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--paper);padding:2px 5px;border:1.5px solid var(--rule);text-align:center}
+.pile.live{cursor:pointer;animation:pulse 1.1s ease-in-out infinite}
+.mkt .card.live{cursor:pointer}
+.mkt .card.live .face{box-shadow:0 0 0 3px var(--ink-pink),3px 3px 0 var(--shadow)}
+
+/* ---------- popover: pick the shared value ---------- */
+.pop{position:fixed;z-index:800;background:var(--paper);border:3px solid var(--rule);
+  box-shadow:7px 7px 0 var(--shadow);width:330px;max-height:74vh;overflow:auto;padding:0}
+.pop h5{margin:0;font-family:var(--display);font-size:15px;letter-spacing:.03em;
+  padding:9px 12px;background:var(--ink);color:var(--paper);text-transform:uppercase;
+  line-height:1.15;position:sticky;top:0;z-index:2}
+.pop h5 span{display:block;font-family:var(--body);font-size:9.5px;font-weight:700;
+  letter-spacing:.06em;opacity:.72;margin-top:3px;text-transform:none}
+.opt{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;
+  border-bottom:1.5px solid var(--rule);min-height:46px}
+.opt:last-child{border-bottom:none}
+.opt:hover{background:var(--ink-yellow);color:#14121C}
+.opt:hover .om{color:#14121C}
+.opt .oq{flex:1;font-size:12px;font-weight:700;line-height:1.25}
+.opt .om{display:block;font-size:9px;font-weight:800;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--ink-faint);margin-top:2px}
+.opt .ings{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.opt .ings i{font-style:normal;font-size:8.5px;font-weight:900;letter-spacing:.07em;
+  padding:2px 6px;border:1.5px solid var(--rule);text-transform:uppercase}
+.opt .ings i.hot{background:var(--ink-red);color:#fff}
+.opt .ings i.brg{background:var(--ink-blue);color:#fff}
+.opt .ings i.mid{background:var(--ink-violet);color:#fff}
+.opt .ings i.tgt{background:var(--ink-orange);color:#2b1105}
+.opt .ings i.cold,.opt .ings i.plain{background:transparent;color:var(--ink-faint);
+  border-color:var(--ink-faint);text-transform:none;font-weight:700}
+.slot.gainz{border-color:var(--ink-green);color:var(--ink-green);
+  background:color-mix(in srgb,var(--ink-green) 15%,transparent)}
+.slot.gainz:hover{background:color-mix(in srgb,var(--ink-green) 30%,transparent)}
+.banner.obj{background:var(--ink-green);color:#06301B;transform:translate(-50%,-50%) rotate(2deg)}
+.banner.obj .bs em{background:#06301B;color:var(--ink-green)}
+
+/* ---------- score burst ---------- */
+.burst{position:fixed;z-index:950;font-family:var(--display);font-size:52px;
+  color:var(--ink-pink);pointer-events:none;text-shadow:3px 3px 0 var(--rule);
+  font-variant-numeric:tabular-nums}
+.banner{position:fixed;z-index:940;left:50%;top:26%;transform:translate(-50%,-50%) rotate(-3deg);
+  background:var(--ink-blue);color:#fff;border:4px solid var(--rule);padding:14px 26px;
+  box-shadow:9px 9px 0 var(--shadow);pointer-events:none;text-align:center;max-width:92vw}
+.banner .bt{font-family:var(--display);font-size:42px;line-height:.9;letter-spacing:.03em;
+  text-transform:uppercase}
+.banner .bs{font-size:12.5px;font-weight:700;margin-top:7px;line-height:1.4}
+.banner .bs em{font-style:normal;background:var(--ink-yellow);color:#14121C;padding:0 4px}
+
+/* ---------- modal ---------- */
+.veil{position:fixed;inset:0;z-index:1000;background:color-mix(in srgb,var(--ink) 78%,transparent);
+  display:grid;place-items:center;padding:18px}
+.sheet{background:var(--paper);border:4px solid var(--rule);box-shadow:11px 11px 0 var(--shadow);
+  max-width:600px;width:100%;max-height:88vh;overflow:auto}
+.sheet .hd{background:var(--ink-pink);color:#fff;padding:15px 22px;
+  border-bottom:4px solid var(--rule)}
+.sheet .hd h2{font-family:var(--display);font-size:38px;line-height:.9;margin:0;
+  letter-spacing:.02em;text-transform:uppercase}
+.sheet .hd p{margin:7px 0 0;font-size:13px;font-weight:600;line-height:1.45}
+.sheet .bd{padding:20px 22px 22px}
+.stepr{display:flex;gap:13px;align-items:flex-start;margin-bottom:13px}
+.stepr .k{width:31px;height:31px;flex-shrink:0;background:var(--ink);color:var(--paper);
+  font-family:var(--display);font-size:19px;display:grid;place-items:center}
+.stepr .v{font-size:13.5px;line-height:1.5;padding-top:4px}
+.stepr .v b{background:var(--ink-yellow);color:#14121C;padding:0 4px;font-weight:800}
+.rule{height:3px;background:var(--rule);margin:17px 0}
+.pts-key{display:flex;flex-direction:column;gap:7px}
+.pk{display:flex;align-items:center;gap:10px;font-size:12.5px;line-height:1.4}
+.pk .pv{font-family:var(--display);font-size:19px;min-width:46px;text-align:center;
+  border:2px solid var(--rule);padding:1px 0}
+.pk.lo .pv{background:var(--paper-2)} .pk.hi .pv{background:var(--ink-blue);color:#fff}
+.big{font-family:var(--display);font-size:82px;line-height:.85;text-align:center;
+  color:var(--ink-pink);font-variant-numeric:tabular-nums}
+.bigl{text-align:center;font-size:9.5px;font-weight:900;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px}
+.recap{border:3px solid var(--rule);padding:11px 13px;margin:11px 0;background:var(--paper-2)}
+.recap .rt{font-size:9px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;
+  color:#fff;background:var(--ink-blue);display:inline-block;padding:2px 7px}
+.recap .rw{font-family:var(--display);font-size:20px;margin:7px 0 4px;letter-spacing:.02em;
+  text-transform:uppercase;line-height:1.05}
+.recap .rd{font-size:11.5px;color:var(--ink-soft);line-height:1.5}
+.recap .rd em{font-style:normal;background:var(--ink-yellow);color:#14121C;padding:0 3px;
+  font-weight:700}
+.acts{display:flex;gap:9px;justify-content:flex-end;margin-top:19px;flex-wrap:wrap}
+.fine{font-size:11px;color:var(--ink-faint);line-height:1.55;border-top:2px solid var(--rule);
+  margin-top:17px;padding-top:11px}
+
+@media (max-width:980px){
+  .brand .t{font-size:21px} .gauge{padding:5px 10px} .gauge .n{font-size:23px}
+  .tools{padding:0 7px;gap:5px} .tools .hide-s{display:none}
+  .card,.newc{width:126px;min-width:126px;height:166px}
+  .slot{width:88px;min-width:88px;height:166px} .pile{width:74px;min-width:74px;height:166px}
+  .nm{font-size:19px} .strip{min-height:194px} .board{padding:12px 12px 6px}
+  .tray{flex-direction:column-reverse}
+  .tray .zone{padding:7px 10px 10px;width:100%}
+  .tray .zone.m{border-left:none;border-bottom:2px solid var(--rule)}
+  .hand,.mkt{min-height:190px}
+  .mkt{overflow-x:auto;padding-bottom:3px}
+}
+/* phones: the vertical budget is tight, so cards shrink, the market becomes a
+   compact strip, and the worked example drops to text only */
+@media (max-width:620px){
+  .brand{padding:5px 9px}
+  .brand .t{font-size:17px} .brand .s{display:none}
+  .gauge{padding:4px 9px} .gauge .n{font-size:19px} .gauge .l{font-size:7px;letter-spacing:.08em}
+  .tools{padding:0 5px;gap:4px}
+  .tools button{padding:5px 8px;min-height:32px;font-size:10px}
+  .icon-b{width:30px}
+  .coach{padding:6px 11px;font-size:11.5px;gap:8px} .coach b{font-size:13px}
+  .coach .dot{width:8px;height:8px}
+  .card,.newc{width:106px;min-width:106px;height:146px}
+  .card .jb{display:none} .card .chip{display:none}
+  .nm{font-size:16px;margin-top:5px} .nm i{font-size:10px}
+  .pl{font-size:10px} .sg{font-size:9px;margin-top:auto} .sg b{font-size:11px}
+  .blob{width:28px;height:28px;font-size:17px}
+  .face::before{width:36px;height:36px}
+  .face{padding:7px 8px}
+  .mkt .card{width:98px;min-width:98px;height:132px}
+  .mkt .nm{font-size:15px}
+  /* a 7-card fan can't stay legible this narrow, so the hand becomes a swipe row */
+  .hand{overflow-x:auto;overflow-y:hidden;padding-top:12px;align-items:flex-start}
+  .gauge.deck-g{display:none}
+  #b-theme{display:none}
+  .pile{width:62px;min-width:62px;height:132px} .pile .n{font-size:24px}
+  .slot{width:74px;min-width:74px;height:146px} .slot .up{font-size:22px}
+  .slot .lb{font-size:8px} .slot .sc{font-size:16px}
+  .hand{min-height:168px;padding-left:3px} .mkt{min-height:150px}
+  .tray .zone{padding:5px 8px 8px}
+  .zlab{font-size:7.5px;height:22px;margin-bottom:4px}
+  .lnk{min-width:74px} .lnk .tagl{padding:3px 6px} .lnk .tagl .v{font-size:17px}
+  .lnk .tagl .q{font-size:7px}
+  .strip{min-height:172px;padding:10px 9px}
+  .board{padding:10px 9px 4px;gap:10px}
+  .demo .drow{display:none}
+  .demo .dcap{font-size:11.5px;padding:9px 12px}
+  .demo .dh{font-size:12px}
+  .goals{padding:5px 10px;gap:6px}
+  .goal{font-size:9.5px;padding:3px 7px;gap:5px} .goal b{font-size:12px}
+  .glab{display:none}
+  .strip .tab{font-size:10px;padding:1px 6px}
+  .pop{width:min(330px,94vw)}
+  .sheet .hd h2{font-size:27px} .sheet .bd{padding:15px 16px 17px}
+  .big{font-size:60px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<div id="shake">
+  <header>
+    <div class="brand"><div class="t">Value<br>Chain</div><div class="s">Find the overlap</div></div>
+    <div class="gauges">
+      <div class="gauge pts"><div class="n" id="g-score">0</div><div class="l">Points</div></div>
+      <div class="gauge brg"><div class="n" id="g-bridge">0</div><div class="l">Bridges</div></div>
+      <div class="gauge deck-g"><div class="n" id="g-deck">0</div><div class="l">Deck</div></div>
+    </div>
+    <div class="tools">
+      <button class="icon-b" id="b-sound" title="Sound on/off" aria-label="Sound on or off">♪</button>
+      <button class="icon-b" id="b-theme" title="Light/dark" aria-label="Light or dark">◐</button>
+      <button id="b-help" class="hide-s">Rules</button>
+      <button id="b-done">Finish</button>
+      <button id="b-new" class="b-go">New</button>
+    </div>
+  </header>
+
+  <div class="coach" id="coach"><span class="dot"></span><span id="coach-t"></span></div>
+  <div class="goals" id="goals"></div>
+  <div class="board" id="board"></div>
+
+  <div class="tray">
+    <div class="zone h">
+      <div class="zlab">Your hand <button id="swap" style="visibility:hidden">Swap card</button></div>
+      <div class="hand" id="hand"></div>
+    </div>
+    <div class="zone m">
+      <div class="zlab">Take one</div>
+      <div class="mkt" id="mkt"></div>
+    </div>
+  </div>
+</div>
+<canvas id="fx"></canvas>
+<div id="pop-root"></div>
+<div id="modal-root"></div>
+
+<script>
+/* ============================================================================
+   ENGINE — unchanged from the balance-tested build.
+   SYNTHETIC data, structured to mirror the World Values Survey:
+     · zones placed per the Inglehart-Welzel cultural map
+     · people built from real WVS metadata axes (country, age, settlement,
+       education, gender, occupation)
+     · each question weighted by how divided the world really is on it
+   ANTI-STEREOTYPE POLICY (DESIGN.md §10.1): named individuals, never national
+   archetypes; most countries appear 2-3x with genuinely different values.
+   ============================================================================ */
+const DIMS = [
+  {id:'lgbt',   q:'Same-sex couples should be accepted',            short:'Same-sex couples', pts:6},
+  {id:'religion',q:'Religion is a big part of my life',             short:'Religion',         pts:5},
+  {id:'divorce',q:"Divorce is OK if a marriage isn't working",      short:'Divorce',          pts:5},
+  {id:'immig',  q:'People moving here from other countries make it better', short:'Newcomers',pts:5},
+  {id:'gender', q:'Girls and boys should get exactly the same chances', short:'Equal chances',pts:4},
+  {id:'obey',   q:'Children should always obey their parents',      short:'Obeying parents',  pts:4},
+  {id:'nation', q:"I'm very proud of my country",                   short:'Country pride',    pts:4},
+  {id:'author', q:'We should show more respect for people in charge',short:'Respect leaders', pts:3},
+  {id:'trust',  q:'Most people can be trusted',                     short:'Trust',            pts:3},
+  {id:'environ',q:'Protecting nature matters more than making money',short:'Nature',          pts:3},
+  {id:'democ',  q:'Everyone should have a say in how the country is run', short:'Everyone says',pts:2},
+  {id:'work',   q:'Working hard is how you get ahead in life',      short:'Hard work',        pts:2},
+  {id:'help',   q:'We should help people in other countries',       short:'Helping abroad',   pts:2},
+  {id:'family', q:'Family comes first',                             short:'Family first',     pts:1},
+];
+const DI = Object.fromEntries(DIMS.map((d,i)=>[d.id,i]));
+
+const ZONES = {
+  nordic:{name:'Northern Europe',  ink:'--ink-teal',   v:{lgbt:88,religion:20,divorce:85,immig:65,gender:92,obey:25,nation:45,author:30,trust:68,environ:78,democ:88,work:40,help:78,family:82}},
+  anglo: {name:'English-speaking', ink:'--ink-violet', v:{lgbt:68,religion:60,divorce:70,immig:55,gender:82,obey:45,nation:78,author:55,trust:42,environ:52,democ:80,work:80,help:55,family:85}},
+  latin: {name:'Latin America',    ink:'--ink-orange', v:{lgbt:58,religion:68,divorce:62,immig:50,gender:72,obey:55,nation:72,author:55,trust:25,environ:62,democ:68,work:70,help:52,family:92}},
+  cath:  {name:'Southern Europe',  ink:'--ink-yellow', v:{lgbt:74,religion:45,divorce:72,immig:52,gender:84,obey:40,nation:55,author:45,trust:42,environ:68,democ:82,work:55,help:62,family:88}},
+  orth:  {name:'Eastern Europe',   ink:'--ink-red',    v:{lgbt:22,religion:55,divorce:62,immig:34,gender:64,obey:56,nation:72,author:64,trust:30,environ:48,democ:54,work:55,help:40,family:86}},
+  afrme: {name:'Africa & Mid-East',ink:'--ink-green',  v:{lgbt:6, religion:95,divorce:28,immig:40,gender:38,obey:80,nation:84,author:80,trust:22,environ:55,democ:60,work:74,help:55,family:95}},
+  conf:  {name:'East Asia',        ink:'--ink-pink',   v:{lgbt:44,religion:25,divorce:55,immig:36,gender:62,obey:56,nation:64,author:62,trust:46,environ:58,democ:56,work:80,help:45,family:84}},
+  sasia: {name:'South Asia',       ink:'--ink-blue',   v:{lgbt:26,religion:88,divorce:40,immig:42,gender:52,obey:74,nation:82,author:74,trust:30,environ:60,democ:66,work:82,help:48,family:94}},
+};
+(function(){
+  const acc={}; DIMS.forEach(d=>acc[d.id]=0);
+  const zs=Object.values(ZONES); zs.forEach(z=>DIMS.forEach(d=>acc[d.id]+=z.v[d.id]));
+  const v={}; DIMS.forEach(d=>v[d.id]=Math.round(acc[d.id]/zs.length));
+  ZONES.global={name:'Everywhere',ink:'--ink-faint',v};
+})();
+
+const MODS = {
+  youngUrbanGrad:{religion:-16,lgbt:20,divorce:12,gender:12,immig:12,obey:-16,author:-12,nation:-8,trust:4,environ:12,democ:4,work:-6,help:8,family:-4},
+  olderRural:    {religion:12,lgbt:-16,divorce:-10,gender:-12,immig:-10,obey:16,author:12,nation:8,trust:-2,environ:-4,democ:-4,work:4,help:-6,family:4},
+  military:      {nation:18,author:20,obey:12,work:8,gender:-8,immig:-8,lgbt:-8,trust:-6},
+  women:         {gender:9,environ:6,nation:-6,author:-5,work:-4,lgbt:3,help:5},
+  business:      {work:12,environ:-10,trust:8,author:6,immig:5,democ:-2},
+  care:          {environ:8,gender:8,trust:8,author:-6,lgbt:5,work:-6,help:10},
+  farming:       {religion:7,obey:8,environ:-6,trust:-5,author:6,work:4,immig:-5},
+  student:       {democ:6,environ:8,lgbt:8,obey:-10,work:-8,help:6},
+  urbanGlobal:   {religion:-6,lgbt:6,environ:4,immig:4,author:-4},
+};
+
+const PEOPLE = [
+  {id:'in1',name:'Ananya',age:24,place:'Bengaluru, India',job:'software developer',zone:'sasia',mods:['youngUrbanGrad'],breadth:1},
+  {id:'in2',name:'Rajesh', age:58,place:'rural Bihar, India',job:'grows rice on a small farm',zone:'sasia',mods:['olderRural','farming'],breadth:1},
+  {id:'in3',name:'Meera',  age:41,place:'Pune, India',job:'secondary school teacher',zone:'sasia',mods:['care','women'],breadth:1},
+  {id:'us1',name:'Tyler',  age:27,place:'Seattle, USA',job:'data analyst',zone:'anglo',mods:['youngUrbanGrad','business'],breadth:1},
+  {id:'us2',name:'Deborah',age:54,place:'rural Alabama, USA',job:'shop assistant, church volunteer',zone:'anglo',mods:['olderRural','women'],breadth:1},
+  {id:'us3',name:'Marcus', age:45,place:'Detroit, USA',job:'factory technician',zone:'anglo',mods:[],breadth:2},
+  {id:'ng1',name:'Chidi',  age:31,place:'Lagos, Nigeria',job:'runs a phone repair business',zone:'afrme',mods:['business','urbanGlobal'],breadth:1},
+  {id:'ng2',name:'Fatima', age:63,place:'rural Kano, Nigeria',job:'farmer',zone:'afrme',mods:['olderRural','farming','women'],breadth:1},
+  {id:'br1',name:'Lucas',  age:20,place:'São Paulo, Brazil',job:'university student',zone:'latin',mods:['student','youngUrbanGrad'],breadth:1},
+  {id:'br2',name:'Neusa',  age:66,place:'rural Bahia, Brazil',job:'farm worker',zone:'latin',mods:['olderRural','farming','women'],breadth:1},
+  {id:'se1',name:'Elin',   age:29,place:'Malmö, Sweden',job:'hospital nurse',zone:'nordic',mods:['care','women'],breadth:1},
+  {id:'se2',name:'Bengt',  age:71,place:'rural Dalarna, Sweden',job:'retired forestry worker',zone:'nordic',mods:['olderRural'],breadth:1},
+  {id:'jp1',name:'Yuki',   age:26,place:'Tokyo, Japan',job:'graphic designer',zone:'conf',mods:['youngUrbanGrad'],breadth:1},
+  {id:'jp2',name:'Toshio', age:68,place:'rural Akita, Japan',job:'rice farmer',zone:'conf',mods:['olderRural','farming'],breadth:1},
+  {id:'cn1',name:'Wei',    age:33,place:'Shenzhen, China',job:'electronics engineer',zone:'conf',mods:['business','youngUrbanGrad'],breadth:1},
+  {id:'cn2',name:'Lian',   age:57,place:'rural Gansu, China',job:'market gardener',zone:'conf',mods:['olderRural','farming','women'],breadth:1},
+  {id:'ru1',name:'Dmitri', age:49,place:'Chelyabinsk, Russia',job:'factory foreman',zone:'orth',mods:[],breadth:2},
+  {id:'ru2',name:'Sofia',  age:23,place:'Moscow, Russia',job:'medical student',zone:'orth',mods:['youngUrbanGrad','student'],breadth:1},
+  {id:'eg1',name:'Hassan', age:60,place:'rural Sohag, Egypt',job:'farmer',zone:'afrme',mods:['olderRural','farming'],breadth:1},
+  {id:'eg2',name:'Nour',   age:30,place:'Cairo, Egypt',job:'pharmacist',zone:'afrme',mods:['youngUrbanGrad','women','care'],breadth:1},
+  {id:'pl1',name:'Halina', age:74,place:'small-town Podlasie, Poland',job:'retired, helps at the church',zone:'cath',mods:['olderRural','women'],breadth:1},
+  {id:'it1',name:'Giulia', age:68,place:'small-town Puglia, Italy',job:'retired seamstress',zone:'cath',mods:['olderRural','women'],breadth:1},
+  {id:'fr1',name:'Karim',  age:38,place:'Lyon, France',job:'bus driver',zone:'cath',mods:[],breadth:2},
+  {id:'de1',name:'Anja',   age:44,place:'Stuttgart, Germany',job:'engineer at a car plant',zone:'cath',mods:['business','women'],breadth:1},
+  {id:'nl1',name:'Sanne',  age:25,place:'Amsterdam, Netherlands',job:'café manager and musician',zone:'nordic',mods:['youngUrbanGrad'],breadth:1},
+  {id:'ar1',name:'Diego',  age:36,place:'Córdoba, Argentina',job:'army officer',zone:'latin',mods:['military'],breadth:1},
+  {id:'mx1',name:'Carmen', age:47,place:'Guadalajara, Mexico',job:'runs a hardware shop',zone:'latin',mods:['business','women'],breadth:1},
+  {id:'co1',name:'Andrés', age:52,place:'rural Huila, Colombia',job:'coffee grower',zone:'latin',mods:['farming','olderRural'],breadth:1},
+  {id:'ke1',name:'Amara',  age:35,place:'Nairobi, Kenya',job:'nurse',zone:'afrme',mods:['care','women'],breadth:1},
+  {id:'tr1',name:'Emre',   age:43,place:'Konya, Turkey',job:'shopkeeper',zone:'afrme',mods:['business'],breadth:1},
+  {id:'pk1',name:'Bilal',  age:39,place:'Lahore, Pakistan',job:'long-distance truck driver',zone:'afrme',mods:[],breadth:2},
+  {id:'id1',name:'Sri',    age:34,place:'Surabaya, Indonesia',job:'primary school teacher',zone:'afrme',mods:['care','women'],breadth:1},
+  {id:'kr1',name:'Jihoon', age:28,place:'Busan, South Korea',job:'junior office worker',zone:'conf',mods:['youngUrbanGrad'],breadth:1},
+  {id:'gb1',name:'Margaret',age:70,place:'rural Yorkshire, UK',job:'retired postal worker',zone:'anglo',mods:['olderRural','women'],breadth:1},
+  {id:'ca1',name:'Noah',   age:22,place:'Vancouver, Canada',job:'environmental science student',zone:'anglo',mods:['student','youngUrbanGrad','care'],breadth:1},
+  {id:'no1',name:'Ingrid', age:46,place:'Stavanger, Norway',job:'offshore engineer',zone:'nordic',mods:['business','women'],breadth:1},
+  {id:'g1',name:'Women',      age:null,place:'everywhere',job:'half the people on Earth',zone:'global',mods:['women'],breadth:5},
+  {id:'g2',name:'Under-30s',  age:null,place:'everywhere',job:'young people all over the world',zone:'global',mods:['youngUrbanGrad'],breadth:5},
+  {id:'g3',name:'City people',age:null,place:'everywhere',job:'people who live in big cities',zone:'global',mods:['urbanGlobal'],breadth:4},
+  {id:'g4',name:'Country people',age:null,place:'everywhere',job:'people far from cities',zone:'global',mods:['olderRural','farming'],breadth:4},
+];
+
+const clamp=x=>Math.max(0,Math.min(100,x));
+PEOPLE.forEach(p=>{
+  const base=ZONES[p.zone].v, v={};
+  DIMS.forEach(d=>{ let x=base[d.id]; p.mods.forEach(m=>{ if(MODS[m]&&MODS[m][d.id]!=null) x+=MODS[m][d.id]; }); v[d.id]=clamp(Math.round(x)); });
+  p.v=v; p.zoneName=ZONES[p.zone].name; p.ink=ZONES[p.zone].ink;
+});
+
+function distance(a,b){ let s=0; DIMS.forEach(d=>{const g=a.v[d.id]-b.v[d.id]; s+=g*g;}); return Math.sqrt(s/DIMS.length); }
+/* Tolerance GROWS with difference: two near-identical people must match closely, while two
+   very different people count a rough alignment as real common ground. Without this the
+   game's most valuable connections were literally impossible (see DESIGN.md §4). */
+function tolerance(a,b,dist){
+  const d=dist!=null?dist:distance(a,b);
+  return 8 + d*0.22 + (a.breadth-1)*1.2 + (b.breadth-1)*1.2;
+}
+function agreesOn(a,b,dimId,dist){ return Math.abs(a.v[dimId]-b.v[dimId]) <= tolerance(a,b,dist); }
+function stanceWord(v){ return v>=60?'YES':(v<=40?'NO':'MIXED'); }
+function stanceCls(v){ return v>=60?'y':(v<=40?'n':'m'); }
+
+function scoreLink(a,b,dimId){
+  const dim=DIMS[DI[dimId]], topic=dim.pts, dist=distance(a,b);
+  let distBonus=0;
+  if(dist>=55) distBonus=11; else if(dist>=45) distBonus=8;
+  else if(dist>=35) distBonus=5; else if(dist>=25) distBonus=3; else if(dist>=15) distBonus=1;
+  const bothNiche=a.breadth<=2&&b.breadth<=2;
+  const specBonus=bothNiche?2:((a.breadth<=2||b.breadth<=2)?1:0);
+  const gap=Math.abs(a.v[dimId]-b.v[dimId]);
+  const tightBonus=(gap<=4&&bothNiche)?2:0;
+  let kind='link';
+  if(dist>=45) kind='bridge'; else if(tightBonus) kind='bond';
+  return {total:topic+distBonus+specBonus+tightBonus,topic,distBonus,specBonus,tightBonus,
+          dist:Math.round(dist),kind,dimId,gap};
+}
+
+/* ============================================================================
+   SCORING — a chain is worth its links MULTIPLIED by how much of the world it
+   spans. This is what makes a placement an investment rather than a payout:
+   the value of a link depends on the whole chain, so the fattest link is often
+   not the best move. (Measured: real choices on 0% of turns before this, 30%
+   after. See DESIGN.md §13.)
+   ============================================================================ */
+/* MAX_LEN is the single most important number in the game. Without a capacity
+   limit every chain grows until its world-multiplier saturates, every strategy
+   converges, and good play is worth ~4%. Capping it at 6 forces you to reject
+   roughly a third of the cards you see, and good play becomes worth ~20%.
+   It also makes the winning strategy the message: fill a chain with as many
+   different worlds as you can, not with people who already agree. */
+const MIN_CHAIN=3, MAX_CHAINS=3, MAX_LEN=6;
+const chainZones=ch=>new Set(ch.nodes.map(n=>n.zone)).size;
+function chainScore(ch){
+  if(ch.nodes.length<MIN_CHAIN) return 0;
+  return ch.links.reduce((a,l)=>a+l.score,0)*chainZones(ch);
+}
+const chainBase=ch=>ch.links.reduce((a,l)=>a+l.score,0);
+function totalScore(){
+  return S.chains.reduce((a,c)=>a+chainScore(c),0)
+       + S.objectives.filter(o=>o.done).reduce((a,o)=>a+o.bonus,0);
+}
+
+/* Per-game goals. Each is one plain sentence and checks against board state. */
+const OBJECTIVES=[
+  {id:'ages',   text:'Link someone under 25 to someone over 65', bonus:30,
+   check:()=>S.log.some(x=>x.a.age&&x.b.age&&Math.abs(x.a.age-x.b.age)>=40)},
+  {id:'four',   text:'Build one chain touching 4 parts of the world', bonus:40,
+   check:()=>S.chains.some(c=>chainZones(c)>=4)},
+  {id:'six',    text:'Build one chain of 6 people or more', bonus:35,
+   check:()=>S.chains.some(c=>c.nodes.length>=6)},
+  {id:'br3',    text:'Find 3 bridges', bonus:40, check:()=>S.bridges>=3},
+  {id:'big',    text:'Make one link worth 12 or more', bonus:30,
+   check:()=>S.log.some(x=>x.sc.total>=12)},
+  {id:'huge',   text:'Use a “huge group” card in a chain', bonus:20,
+   check:()=>S.chains.some(c=>c.nodes.some(n=>n.breadth>=4))},
+  {id:'gen',    text:'Get someone under 30 and someone over 60 into one chain', bonus:25,
+   check:()=>S.chains.some(c=>c.nodes.some(n=>n.age&&n.age<30)&&c.nodes.some(n=>n.age&&n.age>60))},
+  {id:'farne',  text:'Link Africa & Mid-East directly to Northern Europe', bonus:30,
+   check:()=>S.log.some(x=>{const z=[x.a.zone,x.b.zone];return z.includes('afrme')&&z.includes('nordic');})},
+  {id:'three',  text:'Keep 3 chains alive at once', bonus:25,
+   check:()=>S.chains.filter(c=>c.nodes.length>=MIN_CHAIN).length>=3},
+];
+
+/* ============================================================================
+   SOUND — synthesized live with WebAudio. No audio files, so the whole game
+   stays a single self-contained file. Muted until the first tap (autoplay).
+   ============================================================================ */
+const Snd=(()=>{
+  let ac=null,muted=false,master=null;
+  function ctx(){
+    if(!ac){ const C=window.AudioContext||window.webkitAudioContext; if(!C) return null;
+      ac=new C(); master=ac.createGain(); master.gain.value=.5; master.connect(ac.destination); }
+    if(ac.state==='suspended') ac.resume();
+    return ac;
+  }
+  function tone(f,f2,dur,type,vol,delay){
+    const a=ctx(); if(!a||muted) return;
+    const t=a.currentTime+(delay||0);
+    const o=a.createOscillator(), g=a.createGain();
+    o.type=type||'square'; o.frequency.setValueAtTime(f,t);
+    if(f2) o.frequency.exponentialRampToValueAtTime(Math.max(1,f2),t+dur);
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(vol==null?.1:vol,t+.008);
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t+dur+.02);
+  }
+  function noise(dur,vol,hp,delay){
+    const a=ctx(); if(!a||muted) return;
+    const t=a.currentTime+(delay||0), n=Math.floor(a.sampleRate*dur);
+    const buf=a.createBuffer(1,n,a.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n);
+    const s=a.createBufferSource(); s.buffer=buf;
+    const f=a.createBiquadFilter(); f.type='highpass'; f.frequency.value=hp||700;
+    const g=a.createGain(); g.gain.value=vol==null?.08:vol;
+    s.connect(f); f.connect(g); g.connect(master); s.start(t);
+  }
+  return {
+    unlock(){ ctx(); },
+    pick(){ tone(620,880,.05,'square',.05); },
+    flip(){ noise(.09,.05,1400); },
+    place(){ tone(190,80,.16,'sine',.20); noise(.09,.07,500); },
+    deal(i){ noise(.05,.035,1600,i*.045); },
+    /* Balatro's trick: the count-up tick rises in pitch as the number climbs. */
+    tick(i){ tone(330+i*30,null,.045,'triangle',.055); },
+    bridge(){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,null,.26,'triangle',.10,i*.065)); noise(.3,.05,900,.02); },
+    bond(){ [523,784].forEach((f,i)=>tone(f,null,.18,'triangle',.09,i*.07)); },
+    deny(){ tone(160,110,.15,'sawtooth',.07); },
+    toggle(){ muted=!muted; if(!muted) tone(880,null,.06,'square',.06); return muted; },
+    muted(){ return muted; }
+  };
+})();
+
+/* ============================================================================
+   JUICE — particles, shake, count-up, floating numbers
+   ============================================================================ */
+const RM=matchMedia('(prefers-reduced-motion:reduce)');
+const cv=document.getElementById('fx'), cx=cv.getContext('2d');
+let parts=[];
+function sizeFx(){ cv.width=innerWidth*devicePixelRatio; cv.height=innerHeight*devicePixelRatio;
+  cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px'; cx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); }
+addEventListener('resize',sizeFx); sizeFx();
+
+const INKS=['#FF3D9A','#1B4DFF','#FFC800','#00B368','#FF6B2C','#00C2CC'];
+function splat(x,y,n,power){
+  if(RM.matches) return;
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2, s=(Math.random()*.7+.35)*(power||7);
+    parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-2.2,g:.28,
+      r:Math.random()*5+2.5,life:1,dec:Math.random()*.016+.011,
+      c:INKS[(Math.random()*INKS.length)|0],rot:Math.random()*6,vr:(Math.random()-.5)*.35,
+      sq:Math.random()<.45});
+  }
+  if(!raf) raf=requestAnimationFrame(step);
+}
+let raf=null;
+function step(){
+  cx.clearRect(0,0,innerWidth,innerHeight);
+  parts=parts.filter(p=>p.life>0);
+  parts.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.vy+=p.g; p.vx*=.99; p.life-=p.dec; p.rot+=p.vr;
+    cx.save(); cx.translate(p.x,p.y); cx.rotate(p.rot);
+    cx.globalAlpha=Math.max(0,p.life); cx.fillStyle=p.c;
+    if(p.sq) cx.fillRect(-p.r,-p.r*.6,p.r*2,p.r*1.2);
+    else { cx.beginPath(); cx.arc(0,0,p.r,0,7); cx.fill(); }
+    cx.restore();
+  });
+  if(parts.length) raf=requestAnimationFrame(step); else { raf=null; cx.clearRect(0,0,innerWidth,innerHeight); }
+}
+function shake(mag){
+  if(RM.matches) return;
+  const el=document.getElementById('shake'); let t=0;
+  const iv=setInterval(()=>{
+    t++; const d=mag*(1-t/11);
+    el.style.transform=`translate(${(Math.random()-.5)*d}px,${(Math.random()-.5)*d}px)`;
+    if(t>=11){ clearInterval(iv); el.style.transform=''; }
+  },16);
+}
+function floatScore(x,y,txt,color){
+  const d=document.createElement('div'); d.className='burst'; d.textContent=txt;
+  if(color) d.style.color=color;
+  d.style.left=x+'px'; d.style.top=y+'px'; document.body.appendChild(d);
+  const dur=RM.matches?300:1000;
+  d.animate([{transform:'translate(-50%,-50%) scale(.4)',opacity:0},
+             {transform:'translate(-50%,-50%) scale(1.25)',opacity:1,offset:.22},
+             {transform:'translate(-50%,-170%) scale(1)',opacity:0}],
+            {duration:dur,easing:'cubic-bezier(.2,.9,.3,1)'}).onfinish=()=>d.remove();
+}
+/* count-up with pitch-rising ticks — the audio/visual sync that makes it land */
+function countUp(node,from,to){
+  const steps=Math.min(to-from,16); if(steps<=0){ node.textContent=to; return; }
+  if(RM.matches){ node.textContent=to; return; }
+  let i=0;
+  const iv=setInterval(()=>{
+    i++; node.textContent=Math.round(from+(to-from)*(i/steps));
+    Snd.tick(i);
+    node.animate([{transform:'scale(1.22)'},{transform:'scale(1)'}],{duration:110});
+    if(i>=steps){ clearInterval(iv); node.textContent=to; }
+  },48);
+}
+
+/* ============================================================================
+   STATE
+   ============================================================================ */
+let S,MODE='free';
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const todaySeed=()=>{const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();};
+function shuffle(a,rng){ for(let i=a.length-1;i>0;i--){const j=Math.floor((rng?rng():Math.random())*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function newGame(){
+  const rng=MODE==='daily'?mulberry32(todaySeed()):null;
+  const deck=shuffle(PEOPLE.slice(),rng).slice(0,32);
+  const objs=shuffle(OBJECTIVES.slice(),rng).slice(0,3).map(o=>({...o,done:false}));
+  S={deck,hand:[],mkt:[],chains:[],score:0,links:0,bridges:0,log:[],sel:null,phase:'play',
+     flipped:{},objectives:objs};
+  for(let i=0;i<7;i++) S.hand.push(S.deck.pop());
+  for(let i=0;i<3;i++) if(S.deck.length) S.mkt.push(S.deck.pop());
+  closePop(); closeModal(); render();
+  S.hand.forEach((_,i)=>Snd.deal(i));
+}
+/* A question can be spent only ONCE per chain — so chains slowly saturate and
+   die, and spending a rare question early has a real cost. */
+function validDims(a,b,used){
+  const d=distance(a,b);
+  return DIMS.filter(x=>!used.has(x.id)&&agreesOn(a,b,x.id,d))
+             .map(x=>scoreLink(a,b,x.id)).sort((m,n)=>n.total-m.total);
+}
+/* what this placement would do to the chain's world-multiplier */
+function zoneGain(ch,card){
+  const before=chainZones(ch);
+  const after=new Set([...ch.nodes.map(n=>n.zone),card.zone]).size;
+  return {before,after,gain:after-before};
+}
+function spotsFor(card){
+  const r={t:[],h:[]};
+  S.chains.forEach((ch,ci)=>{
+    if(ch.nodes.length>=MAX_LEN) return;              // chain is full
+    const z=zoneGain(ch,card);
+    if(validDims(ch.nodes[ch.nodes.length-1],card,ch.used).length) r.t.push({ci,z});
+    if(ch.nodes.length>1 && validDims(ch.nodes[0],card,ch.used).length) r.h.push({ci,z});
+  });
+  return r;
+}
+
+/* ============================================================================
+   ACTIONS
+   ============================================================================ */
+function pick(i){
+  if(S.phase!=='play') return;
+  S.sel = S.sel===i?null:i;
+  if(S.sel!=null) Snd.pick();
+  render();
+}
+function startChain(){
+  if(S.phase!=='play'||S.sel==null) return;
+  if(S.chains.length>=MAX_CHAINS){ Snd.deny(); return; }
+  S.chains.push({nodes:[S.hand[S.sel]],links:[],used:new Set()});
+  S.hand.splice(S.sel,1); S.sel=null; Snd.place(); toRefill();
+}
+function play(ci,end,dimId,srcEl){
+  const card=S.hand[S.sel], ch=S.chains[ci];
+  const anchor= end==='t'? ch.nodes[ch.nodes.length-1] : ch.nodes[0];
+  const sc=scoreLink(anchor,card,dimId);
+  const before=totalScore(), zonesBefore=chainZones(ch);
+  if(end==='t'){ ch.nodes.push(card); ch.links.push({dimId,score:sc.total,kind:sc.kind}); }
+  else         { ch.nodes.unshift(card); ch.links.unshift({dimId,score:sc.total,kind:sc.kind}); }
+  ch.used.add(dimId);
+  S.links++; if(sc.kind==='bridge') S.bridges++;
+  S.log.push({a:anchor,b:card,sc});
+  S.hand.splice(S.sel,1); S.sel=null; closePop();
+
+  const newObjs=S.objectives.filter(o=>!o.done&&o.check());
+  newObjs.forEach(o=>o.done=true);
+  const after=totalScore(); S.score=after;
+  const gained=after-before, newZone=chainZones(ch)>zonesBefore;
+
+  const r=srcEl?srcEl.getBoundingClientRect():{left:innerWidth/2,top:innerHeight/2,width:0,height:0};
+  const x=r.left+r.width/2, y=r.top+r.height/2;
+  Snd.place();
+  setTimeout(()=>{
+    if(gained>0) floatScore(x,y,'+'+gained, sc.kind==='bridge'?'#1B4DFF':(newZone?'#00B368':undefined));
+    countUp(document.getElementById('g-score'),before,after);
+    if(sc.kind==='bridge'){ Snd.bridge(); shake(15); splat(x,y,34,10); bridgeBanner(anchor,card,sc); }
+    else if(newZone){ Snd.bond(); splat(x,y,22,8); }
+    else if(sc.kind==='bond'){ Snd.bond(); splat(x,y,14,6); }
+    else splat(x,y,8,4.5);
+    if(newObjs.length) setTimeout(()=>objBanner(newObjs),sc.kind==='bridge'?2100:500);
+  },110);
+  toRefill();
+}
+function objBanner(list){
+  const el=document.createElement('div'); el.className='banner obj';
+  el.innerHTML=`<div class="bt">Goal${list.length>1?'s':''} done!</div>`+
+    list.map(o=>`<div class="bs">${o.text} &nbsp;<em>+${o.bonus}</em></div>`).join('');
+  document.body.appendChild(el);
+  Snd.bridge(); splat(innerWidth/2,innerHeight/3,26,8);
+  el.animate([{transform:'translate(-50%,-50%) rotate(2deg) scale(.6)',opacity:0},
+              {transform:'translate(-50%,-50%) rotate(2deg) scale(1.05)',opacity:1,offset:.3},
+              {transform:'translate(-50%,-50%) rotate(2deg) scale(1)',opacity:1,offset:.8},
+              {transform:'translate(-50%,-50%) rotate(2deg) scale(1)',opacity:0}],
+             {duration:RM.matches?600:2400,easing:'cubic-bezier(.2,.9,.3,1)'}).onfinish=()=>el.remove();
+}
+function toRefill(){
+  if(!S.deck.length&&!S.mkt.length){ S.phase='play'; render(); return; }
+  S.phase='draw'; render();
+}
+function take(src,i){
+  if(S.phase!=='draw') return;
+  let c=null;
+  if(src==='pile'){ if(S.deck.length) c=S.deck.pop(); }
+  else { c=S.mkt[i]; S.mkt.splice(i,1); if(S.deck.length) S.mkt.push(S.deck.pop()); }
+  if(c){ S.hand.push(c); Snd.deal(0); }
+  S.phase='play'; render();
+}
+function toss(){
+  if(S.phase!=='play'||S.sel==null) return;
+  S.hand.splice(S.sel,1); S.sel=null; Snd.flip(); toRefill();
+}
+
+/* ============================================================================
+   RENDER
+   ============================================================================ */
+const $=id=>document.getElementById(id);
+function render(){
+  $('g-score').textContent=S.score; $('g-bridge').textContent=S.bridges; $('g-deck').textContent=S.deck.length;
+  coach(); goals(); board(); market(); hand();
+  /* the fan can only be sized once the tray's final width is settled */
+  requestAnimationFrame(fanOut);
+}
+function goals(){
+  const g=$('goals');
+  g.innerHTML='<span class="glab">Goals</span>'+S.objectives.map(o=>
+    `<span class="goal${o.done?' done':''}">${o.done?'✔ ':''}${o.text}<b>+${o.bonus}</b></span>`).join('');
+}
+function coach(){
+  const t=$('coach-t');
+  if(S.phase==='draw'){ t.innerHTML='<b>Take a card.</b> Grab one you can see, or gamble on the deck.'; return; }
+  if(!S.chains.length&&S.sel==null){ t.innerHTML='<b>Tap a person</b> in your hand to pick them up.'; return; }
+  if(S.sel==null){ t.innerHTML='<b>Tap a person.</b> Pink slots show where they fit — green means they add a new part of the world.'; return; }
+  const c=S.hand[S.sel], sp=spotsFor(c), n=sp.t.length+sp.h.length;
+  const gz=[...sp.t,...sp.h].filter(x=>x.z.gain).length;
+  if(!n) return void(t.innerHTML = S.chains.length>=MAX_CHAINS
+    ? `<b>No seat for ${c.name}.</b> Every chain is full or won't take them — you have to turn them away. Swap the card.`
+    : `<b>No match for ${c.name}.</b> Start a new chain, or swap the card.`);
+  t.innerHTML = gz
+    ? `<b>${c.name} fits ${n} spot${n>1?'s':''}</b> — ${gz} would grow a chain's world multiplier.`
+    : `<b>${c.name} fits ${n} spot${n>1?'s':''}.</b> None add a new world, so you're playing for the link itself.`;
+}
+function sig(p){
+  const g=ZONES.global.v;
+  const rank=DIMS.slice().sort((a,b)=>Math.abs(p.v[b.id]-g[b.id])-Math.abs(p.v[a.id]-g[a.id])).slice(0,3);
+  let h=0; for(const ch of p.id) h=(h*31+ch.charCodeAt(0))>>>0;
+  const d=rank[h%rank.length], w=stanceWord(p.v[d.id]);
+  return `<b class="${stanceCls(p.v[d.id])}">${w}</b> to “${d.short}”`;
+}
+function cardEl(p,cls){
+  const el=document.createElement('div');
+  el.className='card '+(cls||''); el.style.setProperty('--c',`var(${p.ink})`);
+  if(S.flipped[p.id]) el.classList.add('flip');
+  const wide=p.breadth>=4;
+  el.innerHTML=`
+    <div class="face front">
+      <div class="blob" style="background:var(${p.ink})">${p.name[0]}</div>
+      <div class="nm">${p.name}${p.age?` <i>${p.age}</i>`:''}</div>
+      <div class="pl">${p.place}</div>
+      <div class="jb">${p.job}</div>
+      <div class="chip ${wide?'wide':''}">${wide?'huge group':p.zoneName}</div>
+      <div class="sg">${sig(p)}</div>
+      <button class="flipb" aria-label="See all answers">?</button>
+    </div>
+    <div class="face back">
+      <h6>${p.name}’s answers</h6>
+      ${DIMS.map(d=>`<div class="qrow"><span>${d.short}</span><b class="${stanceCls(p.v[d.id])}">${stanceWord(p.v[d.id])}</b></div>`).join('')}
+      <button class="flipb" aria-label="Back to card">↩</button>
+    </div>`;
+  el.querySelectorAll('.flipb').forEach(b=>b.addEventListener('click',ev=>{
+    ev.stopPropagation(); S.flipped[p.id]=!S.flipped[p.id];
+    el.classList.toggle('flip'); Snd.flip();
+  }));
+  return el;
+}
+function board(){
+  const b=$('board'); b.innerHTML='';
+  b.classList.toggle('empty',!S.chains.length);
+  const card=S.sel!=null?S.hand[S.sel]:null;
+  const sp=card?spotsFor(card):{t:[],h:[]};
+  const can=S.phase==='play'&&card;
+
+  S.chains.forEach((ch,ci)=>{
+    const strip=document.createElement('div'); strip.className='strip';
+    const live=ch.nodes.length>=MIN_CHAIN;
+    const tab=document.createElement('div'); tab.className='tab'+(live?'':' dead');
+    const z=chainZones(ch);
+    tab.innerHTML = live
+      ? `Chain ${ci+1} <b>${chainBase(ch)}</b> × <b>${z}</b> world${z>1?'s':''} = <b class="tot">${chainScore(ch)}</b>`
+      : `Chain ${ci+1} · needs ${MIN_CHAIN-ch.nodes.length} more to score`;
+    strip.appendChild(tab);
+    const cap=document.createElement('div');
+    cap.className='tab seats'+(ch.nodes.length>=MAX_LEN?' full':'');
+    cap.textContent=ch.nodes.length>=MAX_LEN?'FULL':`${ch.nodes.length}/${MAX_LEN} seats`;
+    strip.appendChild(cap);
+    const hs=sp.h.find(x=>x.ci===ci); if(can&&hs) strip.appendChild(slotEl(ci,'h',hs.z));
+    ch.nodes.forEach((n,i)=>{
+      const c=cardEl(n);
+      c.style.transform=`rotate(${((i*37)%5)-2}deg)`;   /* print misregistration */
+      strip.appendChild(c);
+      if(i<ch.links.length) strip.appendChild(linkEl(ch.links[i]));
+    });
+    const ts=sp.t.find(x=>x.ci===ci); if(can&&ts) strip.appendChild(slotEl(ci,'t',ts.z));
+    b.appendChild(strip);
+  });
+
+  const row=document.createElement('div'); row.className='strip'; row.style.minHeight='0';
+  row.style.border='none'; row.style.background='none'; row.style.boxShadow='none'; row.style.padding='0';
+  row.style.gap='18px'; row.style.alignItems='center';
+  /* an inert "new chain" box next to the worked example just looks orphaned,
+     so it only appears once it can actually be used */
+  if(can || S.chains.length){
+    const nc=document.createElement('div'); nc.className='newc'+(can?' on':'');
+    nc.innerHTML=`<div class="up">+</div><div>${can?'Start a chain with '+S.hand[S.sel].name:'New chain'}</div>`;
+    if(can) nc.addEventListener('click',startChain);
+    row.appendChild(nc);
+  }
+  if(!S.chains.length) row.appendChild(demoPanel());
+  b.appendChild(row);
+}
+/* The board starts empty, so it shows the game's best real moment as a worked
+   example — onboarding and thesis in one panel. Both people are from the deck. */
+function demoPanel(){
+  const a=PEOPLE.find(p=>p.id==='eg1'), b=PEOPLE.find(p=>p.id==='nl1');
+  const sc=scoreLink(a,b,'family');
+  const d=document.createElement('div'); d.className='demo';
+  d.innerHTML='<div class="dh">What you\'re looking for</div>';
+  const row=document.createElement('div'); row.className='drow';
+  row.appendChild(cardEl(a));
+  row.appendChild(linkEl({dimId:'family',score:sc.total,kind:sc.kind}));
+  row.appendChild(cardEl(b));
+  d.appendChild(row);
+  const cap=document.createElement('div'); cap.className='dcap';
+  cap.innerHTML=`<b>Hassan</b> farms in rural Egypt. <b>Sanne</b> runs a café in Amsterdam.
+    They're the two most different people in the deck — they disagree on almost everything.
+    But both say <em>family comes first</em>. On its own that's the cheapest answer in the game.
+    Between <em>these two</em>, it's worth <b>+${sc.total}</b>.`;
+  d.appendChild(cap);
+  return d;
+}
+/* The slot deliberately does NOT show the points. It shows what the placement
+   does to the chain's world-multiplier — the strategic fact — so the player
+   judges rather than reads the answer off a sorted list. */
+function slotEl(ci,end,z){
+  const s=document.createElement('div'); s.className='slot'+(z.gain?' gainz':'');
+  s.innerHTML = z.gain
+    ? `<div class="up">+</div><div class="lb">new world</div><div class="sc">×${z.before}→×${z.after}</div>`
+    : `<div class="up">+</div><div class="lb">they agree</div><div class="sc">×${z.after}</div>`;
+  s.addEventListener('click',e=>openPop(ci,end,e.currentTarget));
+  return s;
+}
+function linkEl(l){
+  const d=DIMS[DI[l.dimId]];
+  const w=document.createElement('div');
+  w.className='lnk '+(l.kind==='bridge'?'bridge':l.kind==='bond'?'bond':'');
+  w.innerHTML=`<div class="bar"></div><div class="tagl"><div class="q">${d.short}</div><div class="v">+${l.score}</div></div><div class="bar"></div>`;
+  return w;
+}
+function hand(){
+  const h=$('hand'); h.innerHTML='';
+  const n=S.hand.length;
+  $('swap').style.visibility=(S.phase==='play'&&S.sel!=null)?'visible':'hidden';
+  if(!n){ h.innerHTML='<div style="color:var(--ink-faint);font-size:13px;padding:40px 10px;font-weight:600">Hand empty — hit Finish.</div>'; return; }
+  S.hand.forEach((p,i)=>{
+    const c=cardEl(p,'in'+(S.sel===i?' sel':''));
+    c.style.zIndex=10+i;
+    if(S.phase==='play'&&!NARROW()){
+      c.addEventListener('mouseenter',()=>{ if(S.sel!==i) c.style.transform='rotate(0deg) translateY(-26px) scale(1.06)'; });
+      c.addEventListener('mouseleave',()=>{ if(S.sel!==i)
+        c.style.transform=`rotate(${c.dataset.rot}deg) translateY(${c.dataset.lift}px)`; });
+    }
+    c.addEventListener('click',()=>pick(i));
+    h.appendChild(c);
+  });
+  fanOut();
+}
+/* The fan must always fit its container, so the overlap is computed from the
+   measured width rather than hard-coded — otherwise 7 cards spill into the market. */
+const NARROW=()=>matchMedia('(max-width:620px)').matches;
+function fanOut(){
+  const h=$('hand'); const cards=[...h.querySelectorAll('.card')];
+  if(!cards.length) return;
+  if(NARROW()){
+    /* swipe row: every card stays fully readable, no overlap, no rotation */
+    cards.forEach((c,i)=>{
+      c.style.marginRight = i<cards.length-1?'7px':'0';
+      c.style.transform = S.sel===i?'translateY(-9px) scale(1.05)':'none';
+    });
+    const sel=cards[S.sel]; if(sel&&sel.scrollIntoView) sel.scrollIntoView({block:'nearest',inline:'nearest'});
+    return;
+  }
+  /* clientWidth includes padding, and rotation widens each box, so leave slack */
+  const n=cards.length, cw=cards[0].offsetWidth, avail=h.clientWidth-22;
+  let stepPx = n>1 ? Math.min(cw*0.82,(avail-cw)/(n-1)) : cw;
+  stepPx = Math.max(stepPx, 38);
+  const mid=(n-1)/2;
+  cards.forEach((c,i)=>{
+    if(i<n-1) c.style.marginRight=(stepPx-cw)+'px';
+    const off=i-mid, rot=off*2.6;
+    /* the middle of the fan rises; nothing is pushed DOWN, which would clip
+       against the bottom of the viewport */
+    const lift=(off*off-mid*mid)*1.0;
+    c.dataset.rot=rot; c.dataset.lift=lift;
+    c.style.transform = (S.sel===i)
+      ? 'rotate(0deg) translateY(-30px) scale(1.08)'
+      : `rotate(${rot}deg) translateY(${lift}px)`;
+  });
+}
+addEventListener('resize',()=>{ fanOut(); });
+function market(){
+  const m=$('mkt'); m.innerHTML='';
+  const live=S.phase==='draw';
+  const p=document.createElement('div'); p.className='pile'+(live&&S.deck.length?' live':'');
+  p.innerHTML=`<div class="n">${S.deck.length}</div><div class="l">${live?'tap: mystery':'deck'}</div>`;
+  if(live&&S.deck.length) p.addEventListener('click',()=>take('pile'));
+  m.appendChild(p);
+  S.mkt.forEach((c,i)=>{
+    const el=cardEl(c,live?'live':'idle');
+    el.style.transform=`rotate(${(i%3)-1}deg)`;
+    if(live) el.addEventListener('click',()=>take('mkt',i));
+    m.appendChild(el);
+  });
+}
+
+/* ---- popover: choose the shared value ---- */
+let popEl=null;
+function openPop(ci,end,anchorNode){
+  closePop();
+  const card=S.hand[S.sel], ch=S.chains[ci];
+  const anchor= end==='t'? ch.nodes[ch.nodes.length-1] : ch.nodes[0];
+  const opts=validDims(anchor,card,ch.used);
+  if(!opts.length){ Snd.deny(); return; }
+  if(opts.length===1){ play(ci,end,opts[0].dimId,anchorNode); return; }
+  const el=document.createElement('div'); el.className='pop';
+  el.innerHTML=`<h5>${anchor.name} + ${card.name}<span>Pick one — you can only use each question ONCE per chain.</span></h5>`;
+  /* shown in question order, NOT sorted by points, and with no totals: the
+     player reads the ingredients and judges. The number lands after they commit. */
+  opts.slice().sort((a,b)=>DI[a.dimId]-DI[b.dimId]).forEach(o=>{
+    const d=DIMS[DI[o.dimId]];
+    const same=stanceWord(anchor.v[o.dimId])===stanceWord(card.v[o.dimId]);
+    const ing=[];
+    if(d.pts>=5) ing.push('<i class="hot">HOT TOPIC</i>');
+    else if(d.pts<=1) ing.push('<i class="cold">everyone agrees</i>');
+    if(o.kind==='bridge') ing.push('<i class="brg">VERY DIFFERENT LIVES</i>');
+    else if(o.distBonus>=5) ing.push('<i class="mid">different lives</i>');
+    if(o.tightBonus) ing.push('<i class="tgt">exact match</i>');
+    const r=document.createElement('div');
+    r.className='opt '+(o.kind==='bridge'?'bridge':o.kind==='bond'?'bond':'');
+    r.innerHTML=`<div class="oq">${d.q}
+      <span class="om">${same?`both say ${stanceWord(anchor.v[o.dimId])}`:'they land close'}</span>
+      <span class="ings">${ing.join('')||'<i class="plain">quiet agreement</i>'}</span></div>`;
+    r.addEventListener('click',()=>play(ci,end,o.dimId,anchorNode));
+    el.appendChild(r);
+  });
+  document.body.appendChild(el); popEl=el;
+  const r=anchorNode.getBoundingClientRect();
+  let left=Math.min(Math.max(8,r.left-70),innerWidth-338);
+  let top=r.top-8-el.offsetHeight;
+  if(top<70) top=Math.min(r.bottom+8,innerHeight-el.offsetHeight-8);
+  el.style.left=left+'px'; el.style.top=Math.max(8,top)+'px';
+  el.animate([{transform:'translateY(7px) scale(.97)',opacity:0},{transform:'none',opacity:1}],
+             {duration:RM.matches?1:150,easing:'cubic-bezier(.2,.9,.3,1)'});
+}
+function closePop(){ if(popEl){popEl.remove();popEl=null;} }
+document.addEventListener('click',e=>{ if(popEl&&!popEl.contains(e.target)&&!e.target.closest('.slot')) closePop(); });
+
+/* ---- the bridge moment ---- */
+function bridgeBanner(a,b,sc){
+  const d=DIMS[DI[sc.dimId]];
+  const el=document.createElement('div'); el.className='banner';
+  el.innerHTML=`<div class="bt">Bridge!</div>
+    <div class="bs">${a.name} (${a.place}) and ${b.name} (${b.place}) both say
+    <em>${stanceWord(a.v[sc.dimId])}</em> to “${d.q}”.<br>They agree on almost nothing else.</div>`;
+  document.body.appendChild(el);
+  el.animate([{transform:'translate(-50%,-50%) rotate(-3deg) scale(.6)',opacity:0},
+              {transform:'translate(-50%,-50%) rotate(-3deg) scale(1.06)',opacity:1,offset:.3},
+              {transform:'translate(-50%,-50%) rotate(-3deg) scale(1)',opacity:1,offset:.8},
+              {transform:'translate(-50%,-50%) rotate(-3deg) scale(1)',opacity:0}],
+             {duration:RM.matches?600:2600,easing:'cubic-bezier(.2,.9,.3,1)'}).onfinish=()=>el.remove();
+}
+
+/* ============================================================================
+   MODALS
+   ============================================================================ */
+function closeModal(){ $('modal-root').innerHTML=''; }
+function helpModal(){
+  $('modal-root').innerHTML=`<div class="veil"><div class="sheet">
+    <div class="hd"><h2>How it works</h2>
+      <p>Real people around the world got asked the same questions. Find the ones who agree — especially when you'd never guess it.</p></div>
+    <div class="bd">
+      <div class="stepr"><div class="k">1</div><div class="v">Tap a person in your hand.</div></div>
+      <div class="stepr"><div class="k">2</div><div class="v">Drop them on the board. The first one <b>starts a chain</b> — you get <b>3 chains, no more</b>.</div></div>
+      <div class="stepr"><div class="k">3</div><div class="v">Coloured slots show where they fit. <b>Green means they add a new part of the world.</b></div></div>
+      <div class="stepr"><div class="k">4</div><div class="v">Pick <b>what</b> they agree on — you can only use each question <b>once per chain</b>, so spend the good ones carefully.</div></div>
+      <div class="stepr"><div class="k">5</div><div class="v">Take a new card. Keep going.</div></div>
+      <div class="rule"></div>
+      <h3 style="font-family:var(--display);font-size:22px;margin:0 0 9px;text-transform:uppercase">How chains score</h3>
+      <p style="margin:0 0 11px"><b>A chain is worth its links × how many parts of the world it touches.</b>
+      So a chain worth 40 points spanning 4 regions scores <b>160</b>. Someone from a
+      <b>new</b> region is often worth far more than a bigger link from a region you already have.</p>
+      <p style="margin:0 0 11px"><b>Every chain has only ${MAX_LEN} seats.</b> That's the whole game: you'll see
+      far more people than you have room for, so you have to turn some away. A chain of 6 people
+      from 6 different worlds is worth double one of 6 people from 3.</p>
+      <p style="margin:0 0 11px">A chain with fewer than <b>3 people scores nothing</b>. Don't start what you can't finish.</p>
+      <div class="pts-key">
+        <div class="pk lo"><div class="pv">HOT</div><div>The world is split on this question — worth more.</div></div>
+        <div class="pk hi"><div class="pv">DIFF</div><div>These two live very different lives. The biggest points of all: that's a <b>Bridge</b>.</div></div>
+      </div>
+      <p style="font-size:13px;line-height:1.55;margin:15px 0 0">You won't see the points until you commit — read the tags and judge.
+      Tap <b>?</b> on any card to flip it and read all 14 answers.</p>
+      <div class="fine">These people are invented, but their answers are built from how real people of that age, home and job answered a worldwide survey (the World Values Survey). Nobody here speaks for their whole country — that's rather the point.</div>
+      <div class="acts"><button class="b-go" id="h-ok">Play</button></div>
+    </div></div></div>`;
+  $('h-ok').onclick=()=>{ Snd.unlock(); closeModal(); };
+}
+function doneModal(){
+  const br=S.log.filter(x=>x.sc.kind==='bridge').sort((a,b)=>b.sc.total-a.sc.total).slice(0,3);
+  const longest=S.chains.reduce((m,c)=>Math.max(m,c.nodes.length),0);
+  const key='vc_best_'+(MODE==='daily'?todaySeed():'free');
+  const prev=+(localStorage.getItem(key)||0), best=Math.max(prev,S.score);
+  try{ localStorage.setItem(key,best); }catch(e){}
+  const list= br.length? br.map(x=>{
+    const d=DIMS[DI[x.sc.dimId]];
+    return `<div class="recap"><div class="rt">Bridge · +${x.sc.total}</div>
+      <div class="rw">${x.a.name} + ${x.b.name}</div>
+      <div class="rd">${x.a.job}, ${x.a.place}.<br>${x.b.job}, ${x.b.place}.<br>
+      Both said the same thing about <em>${d.q.toLowerCase()}</em>.</div></div>`;}).join('')
+    : `<div class="recap"><div class="rd">No bridges this round. Try linking people from <em>very different places and ages</em> — that's where the points hide.</div></div>`;
+  const chainRows=S.chains.map((c,i)=>{
+    const live=c.nodes.length>=MIN_CHAIN;
+    return `<div class="pk ${live?'hi':'lo'}"><div class="pv">${chainScore(c)}</div><div>${
+      live?`Chain ${i+1}: ${chainBase(c)} points × ${chainZones(c)} parts of the world`
+         : `Chain ${i+1}: only ${c.nodes.length} people — scored nothing`}</div></div>`;}).join('');
+  const objRows=S.objectives.map(o=>
+    `<div class="pk ${o.done?'hi':'lo'}"><div class="pv">${o.done?'+'+o.bonus:'—'}</div><div>${o.text}</div></div>`).join('');
+  $('modal-root').innerHTML=`<div class="veil"><div class="sheet">
+    <div class="hd" style="background:var(--ink-blue)"><h2>Round over</h2>
+      <p>${S.links} links · ${S.bridges} bridges · longest chain ${longest}${prev&&best>S.score?` · your best ${best}`:(prev&&best===S.score?' · new best':'')}</p></div>
+    <div class="bd">
+      <div class="bigl">Points</div><div class="big">${S.score}</div>
+      <div class="rule"></div>
+      <h3 style="font-family:var(--display);font-size:20px;margin:0 0 9px;text-transform:uppercase">Your chains</h3>
+      <div class="pts-key">${chainRows||'<div class="pk lo"><div class="pv">0</div><div>No chains built.</div></div>'}</div>
+      <h3 style="font-family:var(--display);font-size:20px;margin:17px 0 9px;text-transform:uppercase">Goals</h3>
+      <div class="pts-key">${objRows}</div>
+      <div class="rule"></div>
+      <h3 style="font-family:var(--display);font-size:23px;margin:0 0 9px;text-transform:uppercase;letter-spacing:.02em">Unlikely matches</h3>
+      ${list}
+      <p style="font-size:12.5px;line-height:1.6;color:var(--ink-soft);margin:13px 0 0">Every bridge is a place where two people living completely different lives quietly believe the same thing. There are more of those than most people expect.</p>
+      <div class="acts"><button id="d-close">Keep playing</button><button class="b-go" id="d-new">New round</button></div>
+    </div></div></div>`;
+  $('d-close').onclick=closeModal; $('d-new').onclick=newGame;
+  if(S.bridges) splat(innerWidth/2,innerHeight/3,40,9);
+}
+
+/* ============================================================================
+   WIRE UP
+   ============================================================================ */
+$('b-help').onclick=helpModal;
+$('b-done').onclick=doneModal;
+$('swap').onclick=toss;
+$('b-new').onclick=()=>{ Snd.unlock(); newGame(); };
+$('b-sound').onclick=e=>{ Snd.unlock(); const m=Snd.toggle(); e.currentTarget.textContent=m?'✕':'♪';
+  e.currentTarget.style.opacity=m?.45:1; };
+$('b-theme').onclick=()=>{
+  const cur=document.documentElement.getAttribute('data-theme')
+    || (matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+  document.documentElement.setAttribute('data-theme',cur==='dark'?'light':'dark');
+};
+document.addEventListener('pointerdown',()=>Snd.unlock(),{once:true});
+newGame();
+try{ if(!localStorage.getItem('vc_seen')){ helpModal(); localStorage.setItem('vc_seen','1'); } }catch(e){ helpModal(); }
+</script>
+</body>
+</html>
