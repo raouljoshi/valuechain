@@ -543,7 +543,61 @@ one — but it means this is a game of good judgement, not a puzzle with a hidde
 
 ---
 
-## 13. What the prototype demonstrates
+## 13. Multiplayer (built) — the multiplier as a commons
+
+Fork F recommended a **shared board with points banked on play**, which is what the source
+transcript described (*"poängen delas ut direkt när man spelar dem"*, *"dina handlingar påverkar
+mina möjligheter"*). That is now built, in `multiplayer/`.
+
+### 13.1 The design question multiplayer forced
+
+Solo scoring is `chain links × regions spanned`, resolved at the end. On a shared board, *whose* is
+that multiplier? Three options:
+
+- Split the chain bonus at the end by contribution — accurate, but fiddly and unreadable mid-game.
+- Give it to whoever finishes the chain — swingy and punishes early builders.
+- **Pay it on every play: a link is worth `base × the regions the chain spans right now`.**
+
+The third is best, and not only for bookkeeping. It makes the multiplier a **commons**: widening a
+chain raises the payout for everyone who plays into it afterwards, including your rivals. So the
+game asks a genuinely interesting question — build the shared thing, or free-ride on one your
+friends made valuable? A **+15 pioneer bonus** to whoever actually widens a chain is what stops
+free-riding from dominating.
+
+That is a better fit for the project's purpose than any scoring split would have been. The game's
+central claim is that broad coalitions are worth more than narrow ones; making that value *shared*,
+and slightly costly to create, says something truer than making it private.
+
+Seats stay scarce (6 per chain, `players + 2` chains, capped at 6), so friends take the spot you
+were planning for — the interaction the transcript asked for, made literal.
+
+### 13.2 Architecture
+
+Cloudflare Workers + **Durable Objects**: one DO per room code holds authoritative state and fans
+moves out over **hibernating WebSockets**, so an idle room costs almost nothing
+([DO WebSocket docs](https://developers.cloudflare.com/durable-objects/best-practices/websockets/)).
+SQLite-backed DOs are on the free plan. The client is served as static assets from the same Worker,
+so there is one deployable and no CORS.
+
+**The server is authoritative and re-derives every move from the survey data.** Clients send
+intents, never state, so a tampered client cannot invent an agreement the data doesn't support.
+Hands are private — each player's view carries only their own cards.
+
+`public/engine.js` is imported by *both* the Durable Object and the browser, so the rules cannot
+drift between server and client. (The solo prototype keeps an inlined copy so it can still run from
+`file://` with no build step; that duplication is a known cost, noted in the multiplayer README.)
+
+### 13.3 Verified
+
+Bot clients over real WebSockets: 2-player and 4-player games to completion, zero errors, zero rule
+violations (every link re-checked against the data), all players contributing to shared chains, and
+individual scores varying meaningfully (307/491/324/503 in the 4-player run). The server correctly
+rejects: starting when not host, playing out of turn, playing a card you don't hold, and claiming a
+question two people don't agree on.
+
+---
+
+## 14. What the prototype demonstrates
 
 `index.html` is a self-contained, playable prototype (open it in any browser — no build, no server,
 no external requests). It implements the 14 WVS-grounded questions, **40 named people across 8

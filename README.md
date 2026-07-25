@@ -23,7 +23,8 @@ turn away. The way to win is to fill each chain with people from as many differe
 | File | What it is |
 |---|---|
 | **[DESIGN.md](DESIGN.md)** | The concept: source-data analysis, research, scoring model, and recommendations on every key design fork. Start here. |
-| **[index.html](index.html)** | A self-contained, playable **Solo** prototype. No build, no server. |
+| **[index.html](index.html)** | A self-contained, playable **solo** prototype. No build, no server. |
+| **[multiplayer/](multiplayer/README.md)** | **Play with friends** over the internet — Cloudflare Workers + Durable Objects. Shared chains, individual scores. |
 
 ## Run the prototype
 
